@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "976714035962",
+    "firebase_url": "https://infisocial-90d8b-default-rtdb.firebaseio.com",
+    "project_id": "infisocial-90d8b",
+    "storage_bucket": "infisocial-90d8b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976714035962:android:7d197f1b7b01fd5ab38f43",
+        "android_client_info": {
+          "package_name": "com.keshav.infi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "976714035962-32rvmvjn40ltqv24ngpfrf1olt6sbsbe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keshav.infi",
+            "certificate_hash": "ef0f4458e3c15b49e9ad8a3f2801db0e5f0d210b"
+          }
+        },
+        {
+          "client_id": "976714035962-oajiuhe1eha9v3tvt1etelfm1kgslhn8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keshav.infi",
+            "certificate_hash": "8a50a94b3498d98f84d34a72143d4cd91e250afb"
+          }
+        },
+        {
+          "client_id": "976714035962-20q1tdg6ej00ham91m7c7ilrhvmjabqd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCa3ZGMwM9tGOW5J4s4jfS_5dhOJBy4sds"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "976714035962-20q1tdg6ej00ham91m7c7ilrhvmjabqd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "976714035962-vkc7sn800e852r2ttsnjojdj66r6i9ef.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.infiSocial"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

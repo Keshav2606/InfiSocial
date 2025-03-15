@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:infi_social/controllers/signup_controller.dart';
 import 'package:infi_social/pages/login_page.dart';
-import 'package:infi_social/components/button.dart';
 import 'package:infi_social/models/user_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:infi_social/components/bottom_nav.dart';
 import 'package:infi_social/components/text_field.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -16,29 +13,39 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
+
+  bool _isSigningUp = false;
   bool _isPasswordVisible = false;
   Gender selectedGender = Gender.male;
-  final TextEditingController _fullNameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   void signup() async {
+    setState(() {
+      _isSigningUp = true;
+    });
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      await SignupController.signup(
+        context,
+        firstName: _firstNameController.text,
+        lastName: _lastNameController.text,
+        username: _userNameController.text,
         email: _emailController.text,
         password: _passwordController.text,
+        age: _ageController.text,
+        gender: selectedGender.name,
       );
-
-      addUserDetails(_fullNameController.text, _userNameController.text.trim(),
-          _emailController.text, int.parse(_ageController.text));
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const BottomNavigation()),
-      );
+      setState(() {
+      _isSigningUp = false;
+    });
     } catch (error) {
+      setState(() {
+      _isSigningUp = false;
+    });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${error.toString()}'),
@@ -47,31 +54,10 @@ class _SignupPageState extends State<SignupPage> {
     }
   }
 
-  Future addUserDetails(
-      String fullname, String username, String email, int age) async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser.uid)
-          .set({
-        "user_id": currentUser.uid,
-        "isActive": true,
-        "username": username,
-        "email": email,
-        "fullname": fullname,
-        "bio": "",
-        "avatar": "",
-        "followers": [],
-        "following": [],
-        "createdAt": DateTime.now(),
-      });
-    }
-  }
-
   @override
   void dispose() {
-    _fullNameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _userNameController.dispose();
     _ageController.dispose();
@@ -122,17 +108,17 @@ class _SignupPageState extends State<SignupPage> {
                   child: Column(
                     children: [
                       CustomTextField(
-                        controller: _fullNameController,
-                        hintText: 'Enter your Fullname',
-                        labelText: 'Fullname',
+                        controller: _firstNameController,
+                        hintText: 'Enter your First Name',
+                        labelText: 'First Name',
                       ),
                       const SizedBox(
                         height: 30,
                       ),
                       CustomTextField(
-                        controller: _emailController,
-                        hintText: 'Enter your Email Address',
-                        labelText: 'Email Id',
+                        controller: _lastNameController,
+                        hintText: 'Enter your Last Name',
+                        labelText: 'Last Name',
                       ),
                       const SizedBox(
                         height: 30,
@@ -145,48 +131,57 @@ class _SignupPageState extends State<SignupPage> {
                       const SizedBox(
                         height: 30,
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: CustomTextField(
-                              controller: _ageController,
-                              hintText: 'Enter your Age',
-                              labelText: 'Age',
-                            ),
-                          ),
-                          Expanded(
-                            child: DropdownButton(
-                              value: selectedGender,
-                              isExpanded: true,
-                              borderRadius: BorderRadius.circular(8),
-                              hint: const Text('Select Gender'),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
+                      CustomTextField(
+                        controller: _emailController,
+                        hintText: 'Enter your Email Address',
+                        labelText: 'Email Id',
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      CustomTextField(
+                        controller: _ageController,
+                        hintText: 'Enter your Age',
+                        labelText: 'Age',
+                        keyboardType: TextInputType.number,
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      DropdownButtonFormField(
+                        value: selectedGender,
+                        isExpanded: true,
+                        borderRadius: BorderRadius.circular(8),
+                        hint: const Text('Select Gender'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        items: Gender.values
+                            .map(
+                              (gender) => DropdownMenuItem(
+                                value: gender,
+                                child: Text(gender.name.toUpperCase()),
                               ),
-                              items: Gender.values
-                                  .map(
-                                    (gender) => DropdownMenuItem(
-                                      value: gender,
-                                      child: Text(gender.name.toString()),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedGender = value!;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedGender = value!;
+                          });
+                        },
                       ),
                       const SizedBox(
                         height: 30,
                       ),
                       TextField(
                         controller: _passwordController,
-                        obscureText: _isPasswordVisible,
+                        obscureText: !_isPasswordVisible,
                         decoration: InputDecoration(
                           label: const Text('Password'),
                           hintText: 'Create Password',
@@ -200,7 +195,7 @@ class _SignupPageState extends State<SignupPage> {
                               });
                             },
                             child: Icon(
-                              !_isPasswordVisible
+                              _isPasswordVisible
                                   ? FontAwesomeIcons.eyeSlash
                                   : FontAwesomeIcons.eye,
                               size: 20,
@@ -211,7 +206,26 @@ class _SignupPageState extends State<SignupPage> {
                       const SizedBox(
                         height: 35.0,
                       ),
-                      CustomElevatedButton(onTap: signup, text: 'Signup'),
+                      ElevatedButton(
+                        onPressed: signup,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text('Signup'),
+                            SizedBox(width: 12),
+                            if (_isSigningUp)
+                              SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(),
+                              ),
+                          ],
+                        ),
+                      ),
                       const SizedBox(
                         height: 16,
                       ),

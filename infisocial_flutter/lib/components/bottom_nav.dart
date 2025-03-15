@@ -6,7 +6,6 @@ import 'package:infi_social/pages/profile_page.dart';
 import 'package:infi_social/pages/add_post_page.dart';
 import 'package:infi_social/pages/ai_chatbot_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:infi_social/utils/functions/get_user_details.dart';
 
 class BottomNavigation extends StatefulWidget {
   const BottomNavigation({super.key});
@@ -17,7 +16,6 @@ class BottomNavigation extends StatefulWidget {
 
 class _BottomNavigationState extends State<BottomNavigation> {
   int selectedIndex = 0;
-  String avatar = '';
   PageController pageController = PageController();
   final User? currentUser = FirebaseAuth.instance.currentUser;
 
@@ -33,18 +31,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   @override
   void initState() {
-    getCurrentUserDetails();
     super.initState();
-  }
-
-  Future getCurrentUserDetails() async {
-    var userData = await getUserDetails(currentUser!.uid);
-
-    if (mounted) {
-      setState(() {
-        avatar = userData['avatar'];
-      });
-    }
   }
 
   void onItemTapped(int index) {
@@ -76,25 +63,18 @@ class _BottomNavigationState extends State<BottomNavigation> {
         onTap: (index) {
           onItemTapped(index);
         },
-        items: <BottomNavigationBarItem>[
-          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          const BottomNavigationBarItem(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
               icon: Icon(Icons.chat_rounded), label: 'Chat'),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
               icon: Icon(Icons.add_box_outlined), label: 'Add Post'),
-          const BottomNavigationBarItem(
+          BottomNavigationBarItem(
               icon: Icon(FontAwesomeIcons.brain), label: 'InfiBot'),
           BottomNavigationBarItem(
-              icon: avatar == ''
-                  ? const Icon(Icons.person)
-                  : ClipOval(
-                      child: Image.network(
-                        avatar,
-                        width: 40,
-                        height: 40,
-                      ),
-                    ),
-              label: 'Profile'),
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:infi_social/controllers/get_user_controller.dart';
 import 'package:infi_social/pages/menu_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:infi_social/utils/functions/pick_image.dart';
@@ -14,15 +15,27 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final currentUser = FirebaseAuth.instance.currentUser;
+  Map<String, dynamic>? currentUser;
   XFile? _image;
   String? avatarUrl;
   List userPosts = [];
 
   @override
   void initState() {
+    getCurrentUserDetails();
     fetchUserPosts();
     super.initState();
+  }
+
+  void getCurrentUserDetails() async {
+    final box = await Hive.openBox('userData');
+    final userId = await box.get('userId');
+    final _currentUser =
+        await GetUserByIdController.getUserById(userId: userId);
+
+    setState(() {
+      currentUser = _currentUser;
+    });
   }
 
   void fetchUserPosts() async {
@@ -42,7 +55,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
       // Filter posts for the current user
       List<Map<String, dynamic>> userPostsData = postsData
-          .where((post) => post['userId'] == currentUser!.uid)
+          .where((post) => post['userId'] == currentUser!['_id'])
           .toList();
 
       // Update UI
@@ -150,7 +163,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(currentUser!.uid)
+          .doc(currentUser!['_id'])
           .update({
         'avatar': avatarUrl,
       });
@@ -169,7 +182,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       await FirebaseFirestore.instance
           .collection('users')
-          .doc(currentUser!.uid)
+          .doc(currentUser!['_id'])
           .update({
         'avatar': '',
       });
@@ -203,25 +216,11 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      body: FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        future: FirebaseFirestore.instance
-            .collection('users')
-            .doc(currentUser!.uid)
-            .get(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
+      body: currentUser == null
+          ? Center(
               child: CircularProgressIndicator(),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error.toString()}'),
-            );
-          } else if (snapshot.hasData) {
-            Map<String, dynamic>? user = snapshot.data!.data();
-            List followers = user!['followers'];
-            List following = user['following'];
-            return Center(
+            )
+          : Center(
               child: Column(
                 children: [
                   Container(
@@ -231,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            _openModalBottomSheet(user['avatar'] != '');
+                            _openModalBottomSheet(currentUser!['avatarUrl'] != null);
                           },
                           child: Container(
                             width: 120,
@@ -240,10 +239,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               shape: BoxShape.circle,
                               color: Colors.grey,
                             ),
-                            child: user['avatar'] != ''
+                            child: currentUser!['avatarUrl'] != null
                                 ? ClipOval(
                                     child: Image.network(
-                                      user['avatar'],
+                                      currentUser!['avatarUrl'],
                                       fit: BoxFit.cover,
                                     ),
                                   )
@@ -257,13 +256,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           height: 12,
                         ),
                         Text(
-                          user['fullname'],
+                          "${currentUser!['firstName']} ${currentUser!['lastName']}",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 30,
                           ),
                         ),
-                        Text('@${user['username']}'),
+                        Text('@${currentUser!['username']}'),
                       ],
                     ),
                   ),
@@ -294,7 +293,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           // Users followers data
                           Text(
-                            followers.length.toString(),
+                            currentUser!['followers'].length.toString(),
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -313,7 +312,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           // Users following data
                           Text(
-                            following.length.toString(),
+                            currentUser!['following'].length.toString(),
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -357,14 +356,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   )
                 ],
               ),
-            );
-          } else {
-            return const Center(
-              child: Text('No data...'),
-            );
-          }
-        },
-      ),
+            ),
     );
   }
 }

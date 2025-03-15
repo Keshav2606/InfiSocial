@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-// import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:infi_social/components/post_widget.dart';
-import 'package:infi_social/utils/functions/get_user_details.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,24 +12,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int selectedIndex = 0;
-  String avatar = '';
   final User? currentUser = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
-    getCurrentUserDetails();
     super.initState();
   }
 
-  Future getCurrentUserDetails() async {
-    var userData = await getUserDetails(currentUser!.uid);
-
-    if (mounted) {
-      setState(() {
-        avatar = userData['avatar'];
-      });
-    }
-  }
 
   void onItemTapped(int index) {
     setState(() {

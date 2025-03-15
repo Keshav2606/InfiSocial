@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hive/hive.dart';
 import 'package:infi_social/pages/login_page.dart';
 
 class MenuPage extends StatefulWidget {
@@ -19,6 +20,9 @@ class _MenuPageState extends State<MenuPage> {
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
+            final box = await Hive.openBox('userData');
+            await box.clear();
+            
             await FirebaseAuth.instance.signOut();
 
             Navigator.pushReplacement(

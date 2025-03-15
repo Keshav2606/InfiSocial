@@ -1,7 +1,7 @@
 name: infi_social
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.1.0
+version: 1.0.0
 
 environment:
   sdk: ^3.6.0
@@ -26,6 +26,8 @@ dependencies:
   firebase_database: ^11.3.2
   google_sign_in: ^6.2.2
   firebase_remote_config: ^5.4.0
+  socket_io_client: ^3.0.2
+  hive: ^2.2.3
 
 dev_dependencies:
   flutter_test:

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:infi_social/components/button.dart';
+import 'package:infi_social/controllers/login_controller.dart';
 import 'package:infi_social/pages/signup_page.dart';
-import 'package:infi_social/components/bottom_nav.dart';
 import 'package:infi_social/components/text_field.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -17,17 +16,35 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
   bool isLogging = false;
+  bool isLoggingWithGoogle = false;
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
-  void login() async {
+  Future<void> _signIn() async {
+    if (_emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Email can\'t be empty.')));
+      return;
+    }
+    if (_passwordController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Password can\'t be empty.')));
+      return;
+    }
     setState(() {
       isLogging = true;
     });
     try {
-      await _auth.signInWithEmailAndPassword(
+
+      await LoginController.login(
+        context,
         email: _emailController.text,
         password: _passwordController.text,
       );
@@ -35,26 +52,20 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         isLogging = false;
       });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLogging = false;
+        });
+      }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const BottomNavigation()),
-      );
-    } catch (error) {
-      setState(() {
-        isLogging = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $error'),
-        ),
-      );
+      debugPrint('Login error: $e');
     }
   }
 
   Future<void> _signInWithGoogle() async {
     setState(() {
-      isLogging = true;
+      isLoggingWithGoogle = true;
     });
     try {
       // Disconnect to clear previous session
@@ -74,32 +85,32 @@ class _LoginPageState extends State<LoginPage> {
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      await _auth.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        final String? idToken = await user.getIdToken();
+        await LoginController.googleLogin(context, idToken);
+      }
+
       setState(() {
-        isLogging = false;
+        isLoggingWithGoogle = false;
       });
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const BottomNavigation()),
-      );
     } catch (e) {
+      if (!mounted) return;
       setState(() {
-        isLogging = false;
+        isLoggingWithGoogle = false;
       });
+
       debugPrint('Google Sign-In error: $e');
     }
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 
   @override
@@ -140,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 TextField(
                   controller: _passwordController,
-                  obscureText: _isPasswordVisible,
+                  obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     label: const Text('Password'),
                     hintText: 'Enter Password',
@@ -154,7 +165,7 @@ class _LoginPageState extends State<LoginPage> {
                         });
                       },
                       child: Icon(
-                        !_isPasswordVisible
+                        _isPasswordVisible
                             ? FontAwesomeIcons.eyeSlash
                             : FontAwesomeIcons.eye,
                         size: 20,
@@ -165,7 +176,26 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(
                   height: 35.0,
                 ),
-                CustomElevatedButton(onTap: login, text: 'Login'),
+                ElevatedButton(
+                  onPressed: _signIn,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Login'),
+                      SizedBox(width: 12),
+                      if (isLogging)
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(),
+                        ),
+                    ],
+                  ),
+                ),
                 const SizedBox(
                   height: 16,
                 ),
@@ -215,7 +245,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Text('Google'),
                       SizedBox(width: 12),
-                      if (isLogging)
+                      if (isLoggingWithGoogle)
                         SizedBox(
                           width: 20,
                           height: 20,

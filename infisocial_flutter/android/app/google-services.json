@@ -23,6 +23,14 @@
           }
         },
         {
+          "client_id": "976714035962-bobsqrnuermk788so60ef9khe64mrco2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.keshav.infi",
+            "certificate_hash": "137b726c60c3232ed0d9077355e70657dcdb4fb8"
+          }
+        },
+        {
           "client_id": "976714035962-oajiuhe1eha9v3tvt1etelfm1kgslhn8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

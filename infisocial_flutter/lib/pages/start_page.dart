@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:infi_social/services/auth/auth.dart';
+import 'package:hive/hive.dart';
+import 'package:infi_social/components/bottom_nav.dart';
+import 'package:infi_social/pages/login_page.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -12,13 +14,28 @@ class StartPage extends StatefulWidget {
 class _StartPageState extends State<StartPage> {
   @override
   void initState() {
-    Timer(const Duration(milliseconds: 3000), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AuthPage()),
-      );
-    });
     super.initState();
+
+    getLoginStatus();
+  }
+
+  void getLoginStatus() async {
+    final box = await Hive.openBox('userData');
+    final isLoggedin = await box.get('isLoggedin', defaultValue: false);
+
+    Timer(const Duration(milliseconds: 3000), () {
+      if (isLoggedin) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const BottomNavigation()),
+        );
+      }else{
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
+    });
   }
 
   @override

@@ -1,16 +1,34 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatService {
-  // instance of firestore.
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  late IO.Socket socket;
 
-  // get users stream.
-  Stream<List<Map<String, dynamic>>> getUsersStream() {
-    return _firestore.collection('users').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final user = doc.data();
-        return user;
-      }).toList();
+  void connect() {
+    socket = IO.io('http://localhost:8000', 
+        IO.OptionBuilder().setTransports(['websocket']).build());
+
+    socket.onConnect((_) {
+      debugPrint("Connected to server");
     });
+
+    socket.on("receiveMessage", (data) {
+      debugPrint("New message: ${data['message']}");
+    });
+
+    socket.onDisconnect((_) {
+      debugPrint("Disconnected from server");
+    });
+  }
+
+  void sendMessage(String message, String sender) {
+    socket.emit("sendMessage", {
+      "sender": sender,
+      "message": message,
+    });
+  }
+
+  void disconnect() {
+    socket.disconnect();
   }
 }

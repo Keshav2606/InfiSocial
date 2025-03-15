@@ -6,11 +6,13 @@ class CustomTextField extends StatefulWidget {
     required this.controller,
     required this.hintText,
     required this.labelText,
+    this.keyboardType = TextInputType.text,
   });
 
   final TextEditingController controller;
   final String hintText;
   final String labelText;
+  final TextInputType keyboardType;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -21,6 +23,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
   Widget build(BuildContext context) {
     return TextField(
       controller: widget.controller,
+      keyboardType: widget.keyboardType,
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: const TextStyle(

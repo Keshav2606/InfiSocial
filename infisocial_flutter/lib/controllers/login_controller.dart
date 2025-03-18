@@ -7,7 +7,8 @@ import 'package:infi_social/components/bottom_nav.dart';
 import 'package:infi_social/controllers/api_service.dart';
 
 class LoginController {
-  static login(BuildContext context,{required String email, required String password}) async {
+  static login(BuildContext context,
+      {required String email, required String password}) async {
     try {
       final apiUrl = Uri.parse("${ApiService.baseUrl}/users/login");
 
@@ -28,7 +29,6 @@ class LoginController {
         final responseBody = json.decode(response.body)['user'];
 
         debugPrint("Response Body of Login: $responseBody");
-
 
         final box = await Hive.openBox('userData');
         box.put('isLoggedin', true);

@@ -1,66 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:infi_social/controllers/get_user_controller.dart';
+import 'package:infi_social/controllers/posts_controller.dart';
+import 'package:infi_social/controllers/users_controller.dart';
+import 'package:infi_social/models/post_model.dart';
+import 'package:infi_social/models/user_model.dart';
 import 'package:infi_social/pages/menu_page.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:infi_social/services/auth_service.dart';
 import 'package:infi_social/utils/functions/pick_image.dart';
-import 'package:infi_social/services/storage/storage_service.dart';
+import 'package:infi_social/services/storage_service.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  const ProfilePage({super.key, required this.userId});
+
+  final String userId;
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Map<String, dynamic>? currentUser;
+  UserModel? user;
+  UserModel? currentUser;
   XFile? _image;
   String? avatarUrl;
-  List userPosts = [];
+  List<PostModel> userPosts = [];
 
   @override
   void initState() {
-    getCurrentUserDetails();
-    fetchUserPosts();
+    currentUser = Provider.of<AuthService>(context, listen: false).user;
+    getUserDetails();
+    getUserPosts();
     super.initState();
   }
 
-  void getCurrentUserDetails() async {
-    final box = await Hive.openBox('userData');
-    final userId = await box.get('userId');
-    final _currentUser =
-        await GetUserByIdController.getUserById(userId: userId);
+  void getUserDetails() async {
+    final _user = await UsersController.getUserById(userId: widget.userId);
 
     setState(() {
-      currentUser = _currentUser;
+      user = _user;
     });
   }
 
-  void fetchUserPosts() async {
+  void getUserPosts() async {
     try {
-      // Fetch all documents from the 'posts' collection
-      QuerySnapshot<Map<String, dynamic>> querySnapshot =
-          await FirebaseFirestore.instance.collection('posts').get();
+      final _userPosts = await PostsController.getUserPosts(user!.id!);
 
-      List<Map<String, dynamic>> postsData = [];
-
-      // Extract data from all documents
-      for (var doc in querySnapshot.docs) {
-        if (doc.data().containsKey('userId')) {
-          postsData.add(doc.data());
-        }
-      }
-
-      // Filter posts for the current user
-      List<Map<String, dynamic>> userPostsData = postsData
-          .where((post) => post['userId'] == currentUser!['_id'])
-          .toList();
-
-      // Update UI
       setState(() {
-        userPosts = userPostsData;
+        userPosts = _userPosts.where((post) => post.mediaUrl != '').toList();
       });
 
       debugPrint(userPosts.toString());
@@ -126,7 +113,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   GestureDetector(
                     onTap: () async {
                       _image = await pickImage(isCamera: false);
+                      if (_image == null) return;
                       avatarUrl = await uploadOnCloudinary(_image!.path);
+                      if (avatarUrl == null) return;
                       await addAvatar(avatarUrl!);
                       Navigator.pop(context);
 
@@ -160,12 +149,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> addAvatar(String avatarUrl) async {
+    final authService = Provider.of<AuthService>(context, listen: false);
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser!['_id'])
-          .update({
-        'avatar': avatarUrl,
+      await authService.updateUser(userId: user!.id!, updateData: {
+        'avatarUrl': avatarUrl,
       });
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -179,12 +166,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> removeAvatar() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUser!['_id'])
-          .update({
-        'avatar': '',
+      await authService.updateUser(userId: user!.id!, updateData: {
+        'avatarUrl': null,
       });
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -216,145 +201,175 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ],
       ),
-      body: currentUser == null
+      body: user == null
           ? Center(
               child: CircularProgressIndicator(),
             )
           : Center(
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 30, horizontal: 20),
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            _openModalBottomSheet(currentUser!['avatarUrl'] != null);
-                          },
-                          child: Container(
-                            width: 120,
-                            height: 120,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey,
-                            ),
-                            child: currentUser!['avatarUrl'] != null
-                                ? ClipOval(
-                                    child: Image.network(
-                                      currentUser!['avatarUrl'],
-                                      fit: BoxFit.cover,
+              child: RefreshIndicator(
+                onRefresh: () {
+                  getUserDetails();
+                  getUserPosts();
+                  return Future.value(true);
+                },
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 30, horizontal: 20),
+                      child: Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              if (user!.id == currentUser!.id) {
+                                _openModalBottomSheet(user!.avatarUrl != null);
+                              } else {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return Container(
+                                        width: 200,
+                                        height: 200,
+                                        color: Colors.black12
+                                            .withValues(alpha: 60),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 4, vertical: 6),
+                                        child: user!.avatarUrl != ''
+                                            ? Image.network(user!.avatarUrl!)
+                                            : const Icon(
+                                                Icons.person,
+                                                size: 100,
+                                              ),
+                                      );
+                                    });
+                              }
+                            },
+                            child: Container(
+                              width: 120,
+                              height: 120,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey,
+                              ),
+                              child: user!.avatarUrl != null &&
+                                      user!.avatarUrl != ''
+                                  ? ClipOval(
+                                      child: Image.network(
+                                        user!.avatarUrl!,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.person,
+                                      size: 60,
                                     ),
-                                  )
-                                : const Icon(
-                                    Icons.person,
-                                    size: 60,
-                                  ),
+                            ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 12,
-                        ),
-                        Text(
-                          "${currentUser!['firstName']} ${currentUser!['lastName']}",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 30,
+                          const SizedBox(
+                            height: 12,
                           ),
+                          Text(
+                            "${user!.firstName} ${user!.lastName}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 30,
+                            ),
+                          ),
+                          Text('@${user!.username}'),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(
+                          children: [
+                            // User Posts data
+                            Text(
+                              userPosts.length.toString(),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            const Text(
+                              'Post',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text('@${currentUser!['username']}'),
+                        Column(
+                          children: [
+                            // Users followers data
+                            Text(
+                              user!.followers.length.toString(),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Text(
+                              'Followers',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            // Users following data
+                            Text(
+                              user!.following.length.toString(),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Text(
+                              'Following',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Column(
-                        children: [
-                          // User Posts data
-                          Text(
-                            userPosts.length.toString(),
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const Text(
-                            'Post',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          // Users followers data
-                          Text(
-                            currentUser!['followers'].length.toString(),
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Text(
-                            'Followers',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        children: [
-                          // Users following data
-                          Text(
-                            currentUser!['following'].length.toString(),
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Text(
-                            'Following',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  const Text(
-                    'Posts',
-                    textAlign: TextAlign.start,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3),
-                      itemCount: userPosts.length,
-                      itemBuilder: (context, index) {
-                        return GridTile(
-                          key: ValueKey(userPosts[index]),
-                          child: Image.network(
-                            userPosts[index]['mediaUrl'],
-                            fit: BoxFit.cover,
-                          ),
-                        );
-                      },
+                    const SizedBox(
+                      height: 20,
                     ),
-                  )
-                ],
+                    const Text(
+                      'Posts',
+                      textAlign: TextAlign.start,
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    Expanded(
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 3),
+                        itemCount: userPosts.length,
+                        itemBuilder: (context, index) {
+                          return GridTile(
+                            key: ValueKey(userPosts[index]),
+                            child: Image.network(
+                              userPosts[index].mediaUrl,
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
     );

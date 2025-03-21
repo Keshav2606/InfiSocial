@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:infi_social/controllers/login_controller.dart';
+import 'package:infi_social/pages/main_page.dart';
 import 'package:infi_social/pages/signup_page.dart';
-import 'package:infi_social/components/text_field.dart';
+import 'package:infi_social/widgets/text_field_widget.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:infi_social/services/auth_service.dart';
+import 'package:infi_social/services/stream_chat_service.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,10 +18,11 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
-  bool isLogging = false;
-  bool isLoggingWithGoogle = false;
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  bool _isLogging = false;
+  bool _isLoggingWithGoogle = false;
+  // final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   void dispose() {
@@ -28,44 +32,45 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _signIn() async {
-    if (_emailController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Email can\'t be empty.')));
-      return;
-    }
-    if (_passwordController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Password can\'t be empty.')));
-      return;
-    }
-    setState(() {
-      isLogging = true;
-    });
-    try {
+    // if (!_formKey.currentState!.validate()) return;
 
-      await LoginController.login(
-        context,
-        email: _emailController.text,
-        password: _passwordController.text,
+    setState(() => _isLogging = true);
+
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final streamChatService =
+          Provider.of<StreamChatService>(context, listen: false);
+
+      final user = await authService.signIn(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
 
-      setState(() {
-        isLogging = false;
-      });
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          isLogging = false;
-        });
-      }
+      if (user != null) {
+        // Connect to Stream Chat
+        await streamChatService.connectUser(
+          user.id!,
+          user.username,
+          user.avatarUrl,
+        );
 
-      debugPrint('Login error: $e');
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => MainPage()),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to sign in: ${e.toString()}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to sign in: ${e.toString()}')),
+      );
+    } finally {
+      setState(() => _isLogging = false);
     }
   }
 
   Future<void> _signInWithGoogle() async {
     setState(() {
-      isLoggingWithGoogle = true;
+      _isLoggingWithGoogle = true;
     });
     try {
       // Disconnect to clear previous session
@@ -97,16 +102,34 @@ class _LoginPageState extends State<LoginPage> {
 
       if (user != null) {
         final String? idToken = await user.getIdToken();
-        await LoginController.googleLogin(context, idToken);
+        if (idToken != null) {
+          final authService = Provider.of<AuthService>(context, listen: false);
+          final streamChatService =
+              Provider.of<StreamChatService>(context, listen: false);
+
+          final _user = await authService.signInWithGoogle(idToken);
+
+          if (_user != null) {
+            await streamChatService.connectUser(
+              _user.id!,
+              _user.username,
+              _user.avatarUrl,
+            );
+
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => MainPage()),
+            );
+          }
+        }
       }
 
       setState(() {
-        isLoggingWithGoogle = false;
+        _isLoggingWithGoogle = false;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        isLoggingWithGoogle = false;
+        _isLoggingWithGoogle = false;
       });
 
       debugPrint('Google Sign-In error: $e');
@@ -187,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Text('Login'),
                       SizedBox(width: 12),
-                      if (isLogging)
+                      if (_isLogging)
                         SizedBox(
                           width: 20,
                           height: 20,
@@ -235,7 +258,7 @@ class _LoginPageState extends State<LoginPage> {
                 OutlinedButton.icon(
                   onPressed: _signInWithGoogle,
                   icon: Image.asset(
-                    'assets/images/google_logo.jpeg',
+                    'assets/images/google_logo.png',
                     height: 24,
                     width: 24,
                   ),
@@ -245,7 +268,7 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       Text('Google'),
                       SizedBox(width: 12),
-                      if (isLoggingWithGoogle)
+                      if (_isLoggingWithGoogle)
                         SizedBox(
                           width: 20,
                           height: 20,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:infi_social/services/api_service.dart';
+import 'package:infi_social/services/remote_config_service.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
 class AIChatbotPage extends StatefulWidget {

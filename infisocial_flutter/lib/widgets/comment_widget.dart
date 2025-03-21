@@ -1,43 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:infi_social/components/user_profile.dart';
-import 'package:infi_social/utils/functions/get_user_details.dart';
+import 'package:infi_social/widgets/user_profile_widget.dart';
+import 'package:infi_social/models/comment_model.dart';
 
 class CommentWidget extends StatefulWidget {
   const CommentWidget({
     super.key,
-    required this.commentId,
-    required this.content,
-    required this.userId,
+    required this.comment,
   });
 
-  final String commentId;
-  final String userId;
-  final String content;
+  final CommentModel comment;
 
   @override
   State<CommentWidget> createState() => _CommentWidgetState();
 }
 
 class _CommentWidgetState extends State<CommentWidget> {
-  String username = 'username';
-  String avatar = '';
-
-  getCommentUserDetails() async {
-    var commentedBy = await getUserDetails(widget.userId);
-    if (mounted) {
-      setState(() {
-        username = commentedBy['username'];
-        avatar = commentedBy['avatar'];
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    getCommentUserDetails();
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -49,7 +26,8 @@ class _CommentWidgetState extends State<CommentWidget> {
       child: Row(
         children: [
           UserProfileWidget(
-            avatar: avatar,
+            userId: widget.comment.commentedBy,
+            avatar: widget.comment.commentOwnerAvatar ?? '',
           ),
           Expanded(
             child: Padding(
@@ -58,14 +36,14 @@ class _CommentWidgetState extends State<CommentWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    username,
+                    widget.comment.commentOwnerUsername,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w300,
                     ),
                   ),
                   Text(
-                    widget.content,
+                    widget.comment.content,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,

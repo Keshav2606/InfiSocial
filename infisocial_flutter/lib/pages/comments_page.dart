@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:infi_social/components/comment_widget.dart';
+import 'package:infi_social/widgets/comment_widget.dart';
+import 'package:infi_social/controllers/posts_controller.dart';
+import 'package:infi_social/models/comment_model.dart';
+import 'package:infi_social/models/user_model.dart';
+import 'package:infi_social/services/auth_service.dart';
+import 'package:provider/provider.dart';
 
 class CommentsPage extends StatefulWidget {
   const CommentsPage({
     super.key,
     required this.postId,
-    required this.comments,
   });
 
   final String postId;
-  final List comments;
 
   @override
   State<CommentsPage> createState() => _CommentsPageState();
@@ -19,29 +20,38 @@ class CommentsPage extends StatefulWidget {
 
 class _CommentsPageState extends State<CommentsPage> {
   final TextEditingController _commentController = TextEditingController();
-  final User currentUser = FirebaseAuth.instance.currentUser!;
+  UserModel? currentUser;
+
+  late Future<List<CommentModel>> comments;
+
+  @override
+  void initState() {
+    super.initState();
+    getCurrentUser();
+    comments = PostsController.getAllComments(widget.postId);
+  }
+
+  Future<void> getCurrentUser() async {
+    final AuthService authService =
+        Provider.of<AuthService>(context, listen: false);
+
+    setState(() {
+      currentUser = authService.user;
+    });
+
+    debugPrint("Current User after parsing: $currentUser");
+  }
 
   void addComment() async {
     String comment = _commentController.text;
     _commentController.clear();
 
     try {
-      DocumentReference docRef =
-          await FirebaseFirestore.instance.collection('comments').add({
-        "postId": widget.postId, // ID of the post this comment belongs to
-        "userId": currentUser.uid, // User who created the comment
-        "content": comment, // Text content of the comment
-        "likes": [], // Array of userIds who liked the comment
-        "createdAt": DateTime.now(), // Timestamp for creation
-        "updatedAt": DateTime.now(), // Timestamp for last update
-      });
-
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.postId)
-          .update({
-        'comments': FieldValue.arrayUnion([docRef.id]),
-      });
+      await PostsController.addComment(
+        userId: currentUser!.id!,
+        postId: widget.postId,
+        content: comment,
+      );
 
       setState(() {});
     } catch (e) {
@@ -66,69 +76,42 @@ class _CommentsPageState extends State<CommentsPage> {
             height: 6,
           ),
           Expanded(
-            child: widget.comments.isEmpty
-                ? const Center(
-                    child: Text('No Comments yet.'),
-                  )
-                : ListView.separated(
-                    itemCount: widget.comments.length,
-                    separatorBuilder: (context, _) => const SizedBox(
-                      height: 8,
+            child: FutureBuilder(
+              future: comments,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CircularProgressIndicator(),
+                        Text("Loading comments..."),
+                      ],
                     ),
+                  );
+                } else if (snapshot.hasError) {
+                  return const Center(
+                    child: Text('Failed to load comments'),
+                  );
+                } else if (snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text("No comments yet."),
+                  );
+                } else {
+                  final comments = snapshot.data as List<CommentModel>;
+
+                  return ListView.builder(
+                    itemCount: comments.length,
                     itemBuilder: (context, index) {
-                      String commentId = widget.comments[index];
-                      return StreamBuilder(
-                          stream: FirebaseFirestore.instance
-                              .collection('comments')
-                              .doc(commentId)
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              var comment = snapshot.data!.data();
-                              return InkWell(
-                                onLongPress: () {
-                                  // showDialog(
-                                  //   barrierLabel: 'Delete',
-                                  //   barrierColor: Colors.grey,
-                                  //   barrierDismissible: true,
-                                  //   context: context,
-                                  //   builder: (context) {
-                                  //     return GestureDetector(
-                                  //       onTap: () async {
-                                  //         await FirebaseFirestore.instance
-                                  //             .collection('comments')
-                                  //             .doc(commentId)
-                                  //             .delete();
-
-                                  //         await FirebaseFirestore.instance
-                                  //             .collection('posts')
-                                  //             .doc(comment['postId'])
-                                  //             .update({
-                                  //           'comments': FieldValue.arrayRemove(
-                                  //               [commentId])
-                                  //         });
-
-                                  //         setState(() {});
-                                  //       },
-                                  //       child:
-                                  //           const Center(child: Text('Delete')),
-                                  //     );
-                                  //   },
-                                  // );
-                                },
-                                child: CommentWidget(
-                                  key: ValueKey(comment),
-                                  commentId: commentId,
-                                  userId: comment!['userId'],
-                                  content: comment['content'],
-                                ),
-                              );
-                            } else {
-                              return const Text('');
-                            }
-                          });
+                      final comment = comments[index];
+                      return CommentWidget(
+                        comment: comment,
+                      );
                     },
-                  ),
+                  );
+                }
+              },
+            ),
           ),
           const SizedBox(
             height: 12,

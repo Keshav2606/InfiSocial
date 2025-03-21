@@ -16,3 +16,11 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
+subprojects {
+    if (project.hasProperty("kotlinOptions")) {
+        project.kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+}

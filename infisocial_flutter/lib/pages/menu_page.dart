@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hive/hive.dart';
 import 'package:infi_social/pages/login_page.dart';
+import 'package:infi_social/services/stream_chat_service.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
@@ -20,9 +21,12 @@ class _MenuPageState extends State<MenuPage> {
       body: Center(
         child: ElevatedButton(
           onPressed: () async {
+            final StreamChatService streamChatService = StreamChatService();
             final box = await Hive.openBox('userData');
             await box.clear();
-            
+
+            await streamChatService.disconnectUser();
+
             await FirebaseAuth.instance.signOut();
 
             Navigator.pushReplacement(

@@ -2,13 +2,11 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:infi_social/controllers/api_service.dart';
+import 'package:infi_social/services/api_service.dart';
 import 'package:infi_social/models/user_model.dart';
-import 'package:infi_social/pages/login_page.dart';
 
-class SignupController {
-  static signup(
-    BuildContext context, {
+class SignUpController {
+  static Future<UserModel?> signUp({
     required String firstName,
     String lastName = '',
     required String username,
@@ -45,30 +43,17 @@ class SignupController {
         final responseBody = json.decode(response.body);
         debugPrint("Response Body of Signup: $responseBody");
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => LoginPage(),
-          ),
-        );
+        final user = UserModel.fromJson(responseBody);
+
+        return user;
       } else {
         final responseBody = json.decode(response.body);
         debugPrint("Response Body of Signup: $responseBody");
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$responseBody'),
-          ),
-        );
+        return null;
       }
     } catch (e) {
       debugPrint(e.toString());
-
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-          ),
-        );
+      return null;
     }
   }
 }

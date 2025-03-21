@@ -1,13 +1,48 @@
 import 'dart:convert';
 
-import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:infi_social/components/bottom_nav.dart';
-import 'package:infi_social/controllers/api_service.dart';
+import 'package:infi_social/models/user_model.dart';
+import 'package:infi_social/services/api_service.dart';
 
-class LoginController {
-  static login(BuildContext context,
+class SignInController {
+  static Future<UserModel?> getCurrentUser(String userId) async {
+    try {
+      final apiUrl = Uri.parse("${ApiService.baseUrl}/users/get-user");
+
+      final queryParam = {
+        "userId": userId,
+      };
+
+      final response = await http.get(
+        apiUrl.replace(queryParameters: queryParam),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseBody = json.decode(response.body)['user'];
+
+        // debugPrint("Response Body of get current user: $responseBody");
+
+        final user = UserModel.fromJson(responseBody);
+
+        return user;
+      } else {
+        final responseBody = json.decode(response.body);
+        debugPrint("Response Body of Login: $responseBody");
+
+        return null;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+
+      return null;
+    }
+  }
+
+  static Future<UserModel?> signIn(
       {required String email, required String password}) async {
     try {
       final apiUrl = Uri.parse("${ApiService.baseUrl}/users/login");
@@ -28,46 +63,30 @@ class LoginController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = json.decode(response.body)['user'];
 
-        debugPrint("Response Body of Login: $responseBody");
+        // debugPrint("Response Body of Login: $responseBody");
 
-        final box = await Hive.openBox('userData');
-        box.put('isLoggedin', true);
-        box.put('userId', responseBody['_id']);
-        box.put('userFirstName', responseBody['firstName']);
-        box.put('userLastName', responseBody['lastName']);
-        box.put('username', responseBody['username']);
-        box.put('userEmail', responseBody['email']);
-        box.put('avatarUrl', responseBody['avatarUrl']);
+        debugPrint("debug Hii 1");
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const BottomNavigation(),
-          ),
-        );
+        final user = UserModel.fromJson(responseBody);
+
+        debugPrint("debug Hii 2");
+
+        return user;
       } else {
         final responseBody = json.decode(response.body);
         debugPrint("Response Body of Login: $responseBody");
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${responseBody['error']}'),
-          ),
-        );
+        return null;
       }
     } catch (e) {
       debugPrint(e.toString());
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
+      return null;
     }
   }
 
-  static googleLogin(BuildContext context, String? idToken) async {
-    if (idToken == null) return;
+  static Future<UserModel?> signInWithGoogle(String? idToken) async {
+    if (idToken == null) return null;
     try {
       final apiUrl = Uri.parse("${ApiService.baseUrl}/users/google-login");
 
@@ -85,40 +104,21 @@ class LoginController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = json.decode(response.body)['user'];
-        debugPrint("Response Body of Google Login: $responseBody");
+        // debugPrint("Response Body of Google Login: $responseBody");
 
-        final box = await Hive.openBox('userData');
-        box.put('isLoggedin', true);
-        box.put('userId', responseBody['_id']);
-        box.put('userFirstName', responseBody['firstName']);
-        box.put('userLastName', responseBody['lastName']);
-        box.put('username', responseBody['username']);
-        box.put('userEmail', responseBody['email']);
+        final user = UserModel.fromJson(responseBody);
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const BottomNavigation(),
-          ),
-        );
+        return user;
       } else {
         final responseBody = json.decode(response.body);
         debugPrint("Response Body of Google Login: $responseBody");
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${responseBody['error']}'),
-          ),
-        );
+        return null;
       }
     } catch (e) {
       debugPrint(e.toString());
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
+      return null;
     }
   }
 }

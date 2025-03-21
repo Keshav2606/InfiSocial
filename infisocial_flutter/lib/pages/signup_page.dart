@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:infi_social/controllers/signup_controller.dart';
 import 'package:infi_social/pages/login_page.dart';
 import 'package:infi_social/models/user_model.dart';
-import 'package:infi_social/components/text_field.dart';
+import 'package:infi_social/widgets/text_field_widget.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:infi_social/services/auth_service.dart';
+// import 'package:infi_social/services/stream_chat_service.dart';
+import 'package:provider/provider.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -29,8 +31,10 @@ class _SignupPageState extends State<SignupPage> {
       _isSigningUp = true;
     });
     try {
-      await SignupController.signup(
-        context,
+      final authService = Provider.of<AuthService>(context, listen: false);
+      // final streamChatService = Provider.of<StreamChatService>(context, listen: false);
+      
+      await authService.signUp(
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
         username: _userNameController.text,

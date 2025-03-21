@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:infi_social/components/bottom_nav.dart';
+import 'package:infi_social/pages/main_page.dart';
 import 'package:infi_social/pages/login_page.dart';
+import 'package:infi_social/services/auth_service.dart';
+import 'package:infi_social/services/stream_chat_service.dart';
+import 'package:provider/provider.dart';
 
 class StartPage extends StatefulWidget {
   const StartPage({super.key});
@@ -15,27 +17,46 @@ class _StartPageState extends State<StartPage> {
   @override
   void initState() {
     super.initState();
-
-    getLoginStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkAuthState());
   }
 
-  void getLoginStatus() async {
-    final box = await Hive.openBox('userData');
-    final isLoggedin = await box.get('isLoggedin', defaultValue: false);
+  Future<void> _checkAuthState() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final streamChatService =
+        Provider.of<StreamChatService>(context, listen: false);
 
-    Timer(const Duration(milliseconds: 3000), () {
-      if (isLoggedin) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const BottomNavigation()),
+    // Wait until AuthService finishes loading
+    while (authService.isLoading) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    if (authService.isLoggedIn) {
+      final user = authService.user!;
+
+      try {
+        // Connect to Stream Chat
+        await streamChatService.connectUser(
+          user.id!,
+          user.username,
+          user.avatarUrl,
         );
-      }else{
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
+        
+      } catch (e) {
+        debugPrint("Stream Chat Connection Failed: $e");
+      }
+
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => MainPage()),
         );
       }
-    });
+    } else {
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => LoginPage()),
+        );
+      }
+    }
   }
 
   @override
@@ -45,11 +66,11 @@ class _StartPageState extends State<StartPage> {
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
                 Colors.black,
-                const Color.fromARGB(255, 1, 81, 146),
+                Color.fromARGB(255, 1, 81, 146),
               ],
             ),
           ),
@@ -63,19 +84,15 @@ class _StartPageState extends State<StartPage> {
               ),
               RichText(
                 textScaler: TextScaler.linear(3),
-                text: TextSpan(
+                text: const TextSpan(
                   children: [
                     TextSpan(
                       text: "Infi",
-                      style: TextStyle(
-                        color: Colors.blue,
-                      ),
+                      style: TextStyle(color: Colors.blue),
                     ),
                     TextSpan(
                       text: "Social",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(color: Colors.white),
                     )
                   ],
                 ),

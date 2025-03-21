@@ -1,37 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:infi_social/pages/chats_page.dart';
+import 'package:infi_social/widgets/user_profile_widget.dart';
+import 'package:infi_social/models/user_model.dart';
+// import 'package:infi_social/models/user_model.dart';
+import 'package:infi_social/pages/chats_list_page.dart';
 import 'package:infi_social/pages/home_page.dart';
 import 'package:infi_social/pages/profile_page.dart';
 import 'package:infi_social/pages/add_post_page.dart';
 import 'package:infi_social/pages/ai_chatbot_page.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:infi_social/services/auth_service.dart';
+import 'package:provider/provider.dart';
+// import 'package:infi_social/services/auth/auth_service.dart';
 
-class BottomNavigation extends StatefulWidget {
-  const BottomNavigation({super.key});
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
 
   @override
-  State<BottomNavigation> createState() => _BottomNavigationState();
+  State<MainPage> createState() => _MainPageState();
 }
 
-class _BottomNavigationState extends State<BottomNavigation> {
+class _MainPageState extends State<MainPage> {
   int selectedIndex = 0;
-  PageController pageController = PageController();
-  final User? currentUser = FirebaseAuth.instance.currentUser;
-
-  final List<Widget> pages = [
-    const Center(child: HomePage()),
-    Center(child: ChatsPage()),
-    const Center(
-      child: AddPostPage(),
-    ),
-    const Center(child: AIChatbotPage()),
-    const Center(child: ProfilePage()),
-  ];
+  // PageController pageController = PageController();
+  UserModel? currentUser;
 
   @override
   void initState() {
     super.initState();
+    currentUser = Provider.of<AuthService>(context, listen: false).user;
   }
 
   void onItemTapped(int index) {
@@ -42,6 +38,13 @@ class _BottomNavigationState extends State<BottomNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> pages = [
+    Center(child: HomePage()),
+    Center(child: ChatListScreen()),
+    Center(child: AddPostPage()),
+    Center(child: AIChatbotPage()),
+    Center(child: ProfilePage(userId: currentUser!.id!,)),
+  ];
     return Scaffold(
       body: IndexedStack(
         index: selectedIndex,
@@ -63,7 +66,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
         onTap: (index) {
           onItemTapped(index);
         },
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
               icon: Icon(Icons.chat_rounded), label: 'Chat'),
@@ -72,7 +75,10 @@ class _BottomNavigationState extends State<BottomNavigation> {
           BottomNavigationBarItem(
               icon: Icon(FontAwesomeIcons.brain), label: 'InfiBot'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: UserProfileWidget(
+              userId: currentUser!.id!,
+              avatar: currentUser!.avatarUrl!,
+            ),
             label: 'Profile',
           ),
         ],

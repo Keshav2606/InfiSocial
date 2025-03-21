@@ -6,11 +6,9 @@ class CommentButton extends StatefulWidget {
   const CommentButton({
     super.key,
     required this.postId,
-    required this.comments,
   });
 
   final String postId;
-  final List comments;
 
   @override
   State<CommentButton> createState() => _CommentButtonState();
@@ -25,7 +23,6 @@ class _CommentButtonState extends State<CommentButton> {
       builder: (context) {
         return CommentsPage(
           postId: widget.postId,
-          comments: widget.comments,
         );
       },
     );

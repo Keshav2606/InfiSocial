@@ -24,6 +24,7 @@ class StreamChatService {
       User(
         id: userId,
         name: name,
+        image: image,
       ),
       token.toString(),
     );
@@ -33,6 +34,19 @@ class StreamChatService {
     if (client != null) {
       await client!.disconnectUser();
     }
+  }
+
+  Future<Channel> createOneToOneChannel(String userId1, String userId2) async {
+    final channel = client!.channel(
+      'messaging',
+      id: '${userId1}_$userId2',
+      extraData: {
+        'members': [userId1, userId2],
+      },
+    );
+
+    await channel.watch();
+    return channel;
   }
 
   Future<Channel> createChannel(String type, String id, String name) async {

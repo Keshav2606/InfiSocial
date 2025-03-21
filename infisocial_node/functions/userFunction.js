@@ -41,6 +41,9 @@ exports.handler = async (event) => {
             const queryParams = event.queryStringParameters;
             return await getUserById(queryParams);
         }
+        else if (httpMethod === "GET" && path === "/users/get-all-users") {
+            return await getAllUsers();
+        }
         else if (httpMethod === "PUT" && path === "/users/update-user") {
             const body = JSON.parse(event.body);
             return await updateUser(body);
@@ -250,6 +253,16 @@ const getUserById = async (queryParams) => {
 
     } catch (error) {
         return buildResponse(500, { error: "Something went wrong, while fetching user", details: error });
+    }
+};
+
+const getAllUsers = async () => {
+    try {
+        const users = await User.find({ isActive: true });
+
+        return buildResponse(200, { message: "Users fetched successfully!", users });
+    } catch (error) {
+        return buildResponse(500, { error: "Something went wrong, while fetching users", details: error });
     }
 };
 

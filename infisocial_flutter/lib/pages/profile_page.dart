@@ -216,131 +216,175 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 30, horizontal: 20),
-                      child: Column(
+                        vertical: 30,
+                        horizontal: 10,
+                      ),
+                      child: Row(
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              if (user!.id == currentUser!.id) {
-                                _openModalBottomSheet(user!.avatarUrl != null);
-                              } else {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return Container(
-                                        width: 200,
-                                        height: 200,
-                                        color: Colors.black12
-                                            .withValues(alpha: 60),
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 4, vertical: 6),
-                                        child: user!.avatarUrl != ''
-                                            ? Image.network(user!.avatarUrl!)
-                                            : const Icon(
-                                                Icons.person,
-                                                size: 100,
-                                              ),
-                                      );
-                                    });
-                              }
-                            },
-                            child: Container(
-                              width: 120,
-                              height: 120,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.grey,
-                              ),
-                              child: user!.avatarUrl != null &&
-                                      user!.avatarUrl != ''
-                                  ? ClipOval(
-                                      child: Image.network(
-                                        user!.avatarUrl!,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.person,
-                                      size: 60,
+                          Container(
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            padding: EdgeInsets.symmetric(horizontal: 6),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    if (user!.id == currentUser!.id) {
+                                      _openModalBottomSheet(
+                                          user!.avatarUrl != null);
+                                    } else {
+                                      showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return Container(
+                                              width: 200,
+                                              height: 200,
+                                              color: Colors.black12
+                                                  .withValues(alpha: 60),
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 4, vertical: 6),
+                                              child: user!.avatarUrl != ''
+                                                  ? Image.network(
+                                                      user!.avatarUrl!)
+                                                  : const Icon(
+                                                      Icons.person,
+                                                      size: 100,
+                                                    ),
+                                            );
+                                          });
+                                    }
+                                  },
+                                  child: Container(
+                                    width: 60,
+                                    height: 60,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.grey,
                                     ),
+                                    child: user!.avatarUrl != null &&
+                                            user!.avatarUrl != ''
+                                        ? ClipOval(
+                                            child: Image.network(
+                                              user!.avatarUrl!,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.person,
+                                            size: 50,
+                                          ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 12,
+                                ),
+                                Text(
+                                  "${user!.firstName} ${user!.lastName}",
+                                  softWrap: true,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Text('@${user!.username}'),
+                              ],
                             ),
                           ),
-                          const SizedBox(
-                            height: 12,
-                          ),
-                          Text(
-                            "${user!.firstName} ${user!.lastName}",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 30,
+                          Expanded(
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Column(
+                                      children: [
+                                        // Users followers data
+                                        Text(
+                                          user!.followers.length.toString(),
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const Text(
+                                          'Followers',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Column(
+                                      children: [
+                                        // Users following data
+                                        Text(
+                                          user!.following.length.toString(),
+                                          style: const TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const Text(
+                                          'Following',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w400,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 12,
+                                ),
+                                if (user!.id == currentUser!.id)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const MenuPage(),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        foregroundColor: Colors.white,
+                                        backgroundColor: Colors.blue,
+                                      ),
+                                      child: const Text('Edit Profile'),
+                                    ),
+                                  ),
+                                if (user!.id != currentUser!.id)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        // Navigator.push(
+                                        //   context,
+                                        //   MaterialPageRoute(
+                                        //     builder: (context) =>
+                                        //         const MenuPage(),
+                                        //   ),
+                                        // );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        foregroundColor: Colors.white,
+                                        backgroundColor: Colors.blue,
+                                      ),
+                                      child: const Text('Follow'),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
-                          Text('@${user!.username}'),
                         ],
                       ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            // User Posts data
-                            Text(
-                              userPosts.length.toString(),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-
-                            const Text(
-                              'Post',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            // Users followers data
-                            Text(
-                              user!.followers.length.toString(),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Text(
-                              'Followers',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            // Users following data
-                            Text(
-                              user!.following.length.toString(),
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const Text(
-                              'Following',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
                     ),
                     const SizedBox(
                       height: 20,

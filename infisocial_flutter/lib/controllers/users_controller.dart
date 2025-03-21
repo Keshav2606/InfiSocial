@@ -20,7 +20,7 @@ class UsersController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = json.decode(response.body)['user'];
-        debugPrint("Response Body of get user by Id: $responseBody");
+        // debugPrint("Response Body of get user by Id: $responseBody");
 
         final user = UserModel.fromJson(responseBody);
 
@@ -33,6 +33,39 @@ class UsersController {
     } catch (e) {
       debugPrint(e.toString());
       return null;
+    }
+  }
+
+  static Future<List<UserModel?>> getAllUsers() async {
+    try {
+      final apiUrl = Uri.parse("${ApiService.baseUrl}/users/get-all-users");
+
+      final response = await http.get(
+        apiUrl,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final responseBody = json.decode(response.body)['users'];
+        // debugPrint("Response Body of get all users: $responseBody");
+
+        List<UserModel> users = [];
+
+        for (var data in responseBody) {
+          users.add(UserModel.fromJson(data));
+        }
+
+        return users;
+      } else {
+        final responseBody = json.decode(response.body);
+        debugPrint("Response Body of Signup: $responseBody");
+        return [];
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      return [];
     }
   }
 

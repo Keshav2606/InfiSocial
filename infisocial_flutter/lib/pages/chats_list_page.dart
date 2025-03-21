@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:infi_social/pages/chat_page.dart';
+import 'package:infi_social/pages/profile_page.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../services/stream_chat_service.dart';
@@ -40,6 +41,31 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: StreamChannelListHeader(
+        titleBuilder: (context, status, client) {
+          if (status == ConnectionStatus.connected) {
+            return Text("InfiChat");
+          } else {
+            return Text("Connecting...");
+          }
+        },
+        onUserAvatarTap: (user) {
+          ProfilePage(userId: user.id);
+        },
+        leading: Container(
+          padding: EdgeInsets.all(12),
+          child: Image.asset(
+            "assets/images/infiSocialLogo.png",
+            fit: BoxFit.contain,
+          ),
+        ),
+        actions: [
+          Icon(Icons.settings),
+          SizedBox(
+            width: 20,
+          ),
+        ],
+      ),
       body: StreamChannelListView(
         controller: _channelListController,
         onChannelTap: (channel) {

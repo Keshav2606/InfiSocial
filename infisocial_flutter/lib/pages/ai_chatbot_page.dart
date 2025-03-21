@@ -78,14 +78,21 @@ class _AIChatbotPageState extends State<AIChatbotPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("AI Chatbot"),
+        title: const Text("InfiBot"),
+        leading: Container(
+          padding: EdgeInsets.all(12),
+          child: Image.asset(
+            "assets/images/infiSocialLogo.png",
+            fit: BoxFit.contain,
+          ),
+        ),
       ),
       body: Column(
         children: [
           Expanded(
             child: _messages.isEmpty
                 ? Center(
-                    child: Text('Start conversation with AI Chatbot'),
+                    child: Text('Start conversation with InfiBot'),
                   )
                 : ListView.builder(
                     itemCount: _messages.length,
@@ -98,27 +105,21 @@ class _AIChatbotPageState extends State<AIChatbotPage> {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: InputDecoration(
-                      hintText: "Type a message...",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                  ),
+            child: TextFormField(
+              controller: _controller,
+              decoration: InputDecoration(
+                hintText: "Type a message...",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
-                IconButton(
+                suffixIcon: IconButton(
                   icon: const Icon(Icons.send),
                   onPressed: () {
                     FocusScope.of(context).unfocus();
                     _sendMessage();
                   },
                 ),
-              ],
+              ),
             ),
           ),
         ],

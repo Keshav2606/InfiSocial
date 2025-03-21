@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "C:\\Users\\KESHAVKUMAR\\Downloads\\flutter\\packages\\flutter_tools\\gradle\\src\\main\\groovy\\CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "C:\\Users\\KESHAVKUMAR\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+      "-C",
+      "C:\\Users\\KESHAVKUMAR\\Documents\\InfiSocial\\InfiSocial\\infisocial_flutter\\android\\app\\.cxx\\RelWithDebInfo\\2j3n6we4\\x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "C:\\Users\\KESHAVKUMAR\\AppData\\Local\\Android\\sdk\\cmake\\3.22.1\\bin\\ninja.exe",
+    "-C",
+    "C:\\Users\\KESHAVKUMAR\\Documents\\InfiSocial\\InfiSocial\\infisocial_flutter\\android\\app\\.cxx\\RelWithDebInfo\\2j3n6we4\\x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}

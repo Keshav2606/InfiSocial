@@ -65,11 +65,11 @@ class SignInController {
 
         // debugPrint("Response Body of Login: $responseBody");
 
-        debugPrint("debug Hii 1");
+        // debugPrint("debug Hii 1");
 
         final user = UserModel.fromJson(responseBody);
 
-        debugPrint("debug Hii 2");
+        // debugPrint("debug Hii 2");
 
         return user;
       } else {

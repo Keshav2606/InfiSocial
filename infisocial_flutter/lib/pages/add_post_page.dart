@@ -67,10 +67,10 @@ class _AddPostPageState extends State<AddPostPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
+            TextFormField(
               controller: captionController,
               decoration: const InputDecoration(
-                hintText: 'Write a caption...',
+                hintText: 'Write something...',
               ),
               maxLines: null,
             ),

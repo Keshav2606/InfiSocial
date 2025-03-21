@@ -47,6 +47,8 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (user != null) {
+        // disConnect to Stream Chat before connecting.
+        await streamChatService.disconnectUser();
         // Connect to Stream Chat
         await streamChatService.connectUser(
           user.id!,
@@ -100,9 +102,13 @@ class _LoginPageState extends State<LoginPage> {
           await FirebaseAuth.instance.signInWithCredential(credential);
       final User? user = userCredential.user;
 
+      debugPrint("Hii_1");
+
       if (user != null) {
         final String? idToken = await user.getIdToken();
+        debugPrint("Hii_2");
         if (idToken != null) {
+          debugPrint("Hii_3");
           final authService = Provider.of<AuthService>(context, listen: false);
           final streamChatService =
               Provider.of<StreamChatService>(context, listen: false);
@@ -110,11 +116,15 @@ class _LoginPageState extends State<LoginPage> {
           final _user = await authService.signInWithGoogle(idToken);
 
           if (_user != null) {
+            debugPrint("Hii_4");
+            await streamChatService.disconnectUser();
             await streamChatService.connectUser(
               _user.id!,
               _user.username,
               _user.avatarUrl,
             );
+
+            debugPrint("Hii_5");
 
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => MainPage()),

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:infi_social/pages/main_page.dart';
-import 'package:infi_social/pages/signup_page.dart';
-import 'package:infi_social/widgets/text_field_widget.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:infi_social/services/auth_service.dart';
-import 'package:infi_social/services/stream_chat_service.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:infi_social/pages/main_page.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:infi_social/pages/signup_page.dart';
+import 'package:infi_social/services/auth_service.dart';
+import 'package:infi_social/widgets/text_field_widget.dart';
+import 'package:infi_social/services/stream_chat_service.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,7 +20,6 @@ class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
   bool _isLogging = false;
   bool _isLoggingWithGoogle = false;
-  // final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -32,8 +31,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _signIn() async {
-    // if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLogging = true);
 
     try {
@@ -57,13 +54,17 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => MainPage()),
+          MaterialPageRoute(
+            builder: (_) => MainPage(),
+          ),
         );
       }
     } catch (e) {
       debugPrint('Failed to sign in: ${e.toString()}');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to sign in: ${e.toString()}')),
+        SnackBar(
+          content: Text('Failed to sign in: ${e.toString()}'),
+        ),
       );
     } finally {
       setState(() => _isLogging = false);

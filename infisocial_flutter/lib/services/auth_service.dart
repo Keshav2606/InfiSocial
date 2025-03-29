@@ -1,9 +1,9 @@
-import 'package:flutter/foundation.dart';
-import 'package:infi_social/controllers/login_controller.dart';
-import 'package:infi_social/controllers/signup_controller.dart';
-import 'package:infi_social/controllers/users_controller.dart';
-import 'package:infi_social/models/user_model.dart';
 import 'package:hive/hive.dart';
+import 'package:flutter/material.dart';
+import 'package:infi_social/models/user_model.dart';
+import 'package:infi_social/controllers/login_controller.dart';
+import 'package:infi_social/controllers/users_controller.dart';
+import 'package:infi_social/controllers/signup_controller.dart';
 
 class AuthService extends ChangeNotifier {
   UserModel? _user;
@@ -126,7 +126,7 @@ class AuthService extends ChangeNotifier {
     required Map<String, dynamic> updateData,
   }) async {
     try {
-     final user = await UsersController.updateUser(
+      final user = await UsersController.updateUser(
         userId: userId,
         updateData: updateData,
       );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:infi_social/widgets/user_profile_widget.dart';
 import 'package:infi_social/models/comment_model.dart';
+import 'package:infi_social/widgets/user_profile_widget.dart';
 
 class CommentWidget extends StatefulWidget {
   const CommentWidget({

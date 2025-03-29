@@ -13,9 +13,6 @@ class CreateChannelScreen extends StatefulWidget {
 }
 
 class _CreateChannelScreenState extends State<CreateChannelScreen> {
-  // final _formKey = GlobalKey<FormState>();
-  // final _nameController = TextEditingController();
-  // final _idController = TextEditingController();
   bool _isLoading = false;
 
   List<UserModel?> allUsers = [];
@@ -26,14 +23,6 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
     super.initState();
     getAllUsers();
     currentUser = Provider.of<AuthService>(context, listen: false).user;
-  }
-
-  @override
-  void dispose() {
-    // _nameController.dispose();
-    // _idController.dispose();
-
-    super.dispose();
   }
 
   Future<void> getAllUsers() async {
@@ -59,10 +48,6 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
       final streamChatService =
           Provider.of<StreamChatService>(context, listen: false);
 
-      // final channelId = _idController.text.trim().isEmpty
-      //     ? DateTime.now().millisecondsSinceEpoch.toString()
-      //     : _idController.text.trim();
-
       await streamChatService.createOneToOneChannel(userId1, userId2);
 
       Navigator.pop(context);
@@ -82,21 +67,58 @@ class _CreateChannelScreenState extends State<CreateChannelScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
-          child: _isLoading
-              ? CircularProgressIndicator()
-              : allUsers.isEmpty
-                  ? Text('No users found')
-                  : ListView.builder(
-                      itemCount: allUsers.length,
-                      itemBuilder: (context, index) {
-                        final user = allUsers[index];
-                        return ListTile(
-                          onTap: () {
-                            _createChannel(currentUser!.id!, user.id!);
-                          },
-                          title: Text("${user!.firstName} ${user.lastName}"),
-                        );
-                      }),
+          child: Column(
+            children: [
+              TextFormField(
+                decoration: InputDecoration(
+                  hintText: "Search...",
+                  suffixIcon: IconButton(
+                    onPressed: () {},
+                    icon: Icon(Icons.search),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+              SizedBox(height: 30),
+              _isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : allUsers.isEmpty
+                      ? Center(child: Text('No users found'))
+                      : Expanded(
+                          child: ListView.builder(
+                              itemCount: allUsers.length,
+                              itemBuilder: (context, index) {
+                                final user = allUsers[index];
+                                return ListTile(
+                                  onTap: () {
+                                    _createChannel(currentUser!.id!, user.id!);
+                                  },
+                                  title: Text(
+                                      "${user!.firstName} ${user.lastName}"),
+                                  leading: CircleAvatar(
+                                    backgroundColor: Colors.grey,
+                                    child: user.avatarUrl != null &&
+                                            user.avatarUrl != ''
+                                        ? Container(
+                                            width: double.infinity,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                            ),
+                                            clipBehavior: Clip.hardEdge,
+                                            child: Image.network(
+                                              user.avatarUrl!,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          )
+                                        : Icon(Icons.person),
+                                  ),
+                                );
+                              }),
+                        ),
+            ],
+          ),
         ),
         // Form(
         //   key: _formKey,

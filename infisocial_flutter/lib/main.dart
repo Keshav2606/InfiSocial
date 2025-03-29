@@ -1,15 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:hive/hive.dart';
-import 'package:infi_social/firebase_options.dart';
-import 'package:infi_social/pages/start_page.dart';
-import 'package:infi_social/services/remote_config_service.dart';
-import 'package:cloudinary_flutter/cloudinary_object.dart';
-import 'package:infi_social/services/auth_service.dart';
-import 'package:infi_social/services/stream_chat_service.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:infi_social/pages/start_page.dart';
+import 'package:infi_social/firebase_options.dart';
+import 'package:infi_social/services/auth_service.dart';
+import 'package:cloudinary_flutter/cloudinary_object.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:infi_social/services/stream_chat_service.dart';
+import 'package:infi_social/services/remote_config_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

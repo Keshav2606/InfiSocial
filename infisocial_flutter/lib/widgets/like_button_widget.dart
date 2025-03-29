@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:infi_social/controllers/posts_controller.dart';
+import 'package:provider/provider.dart';
 import 'package:infi_social/models/user_model.dart';
 import 'package:infi_social/services/auth_service.dart';
-import 'package:provider/provider.dart';
+import 'package:infi_social/controllers/posts_controller.dart';
 
 class LikeButton extends StatefulWidget {
   const LikeButton({super.key, required this.postId, required this.postLikes});

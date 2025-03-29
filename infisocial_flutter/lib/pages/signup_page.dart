@@ -15,7 +15,6 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-
   bool _isSigningUp = false;
   bool _isPasswordVisible = false;
   Gender selectedGender = Gender.male;
@@ -33,7 +32,7 @@ class _SignupPageState extends State<SignupPage> {
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       // final streamChatService = Provider.of<StreamChatService>(context, listen: false);
-      
+
       await authService.signUp(
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
@@ -44,12 +43,18 @@ class _SignupPageState extends State<SignupPage> {
         gender: selectedGender.name,
       );
       setState(() {
-      _isSigningUp = false;
-    });
+        _isSigningUp = false;
+      });
+
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const LoginPage(),
+        ),
+      );
     } catch (error) {
       setState(() {
-      _isSigningUp = false;
-    });
+        _isSigningUp = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error: ${error.toString()}'),

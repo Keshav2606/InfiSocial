@@ -19,7 +19,14 @@ const postSchema = new mongoose.Schema({
     tags: {
         type: [String],
         default: [],
+        index: true,
     },
+    taggedUsers: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'User',
+        default: [],
+        index: true,
+      },
     likes: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: "User",

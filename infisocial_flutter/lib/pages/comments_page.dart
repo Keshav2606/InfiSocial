@@ -27,19 +27,8 @@ class _CommentsPageState extends State<CommentsPage> {
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    currentUser = Provider.of<AuthService>(context, listen: false).user;
     comments = PostsController.getAllComments(widget.postId);
-  }
-
-  Future<void> getCurrentUser() async {
-    final AuthService authService =
-        Provider.of<AuthService>(context, listen: false);
-
-    setState(() {
-      currentUser = authService.user;
-    });
-
-    debugPrint("Current User after parsing: $currentUser");
   }
 
   void addComment() async {
@@ -61,85 +50,94 @@ class _CommentsPageState extends State<CommentsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          const Text(
-            'Comments',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          const SizedBox(
-            height: 6,
-          ),
-          Expanded(
-            child: FutureBuilder(
-              future: comments,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        Text("Loading comments..."),
-                      ],
-                    ),
-                  );
-                } else if (snapshot.hasError) {
-                  return const Center(
-                    child: Text('Failed to load comments'),
-                  );
-                } else if (snapshot.data!.isEmpty) {
-                  return const Center(
-                    child: Text("No comments yet."),
-                  );
-                } else {
-                  final comments = snapshot.data as List<CommentModel>;
-
-                  return ListView.builder(
-                    itemCount: comments.length,
-                    itemBuilder: (context, index) {
-                      final comment = comments[index];
-                      return CommentWidget(
-                        comment: comment,
-                      );
-                    },
-                  );
-                }
-              },
-            ),
-          ),
-          const SizedBox(
-            height: 12,
-          ),
-          TextField(
-            controller: _commentController,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(
-                vertical: 16,
-                horizontal: 12,
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: Column(
+          children: [
+            const Text(
+              'Comments',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.w400,
               ),
-              hintText: 'Add a comment',
-              suffixIcon: IconButton(
-                onPressed: () {
-                  if (_commentController.text.isNotEmpty) {
-                    FocusScope.of(context).unfocus();
-                    addComment();
-                    setState(() {});
+            ),
+            const SizedBox(
+              height: 6,
+            ),
+            Expanded(
+              child: FutureBuilder(
+                future: comments,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          Text("Loading comments..."),
+                        ],
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return const Center(
+                      child: Text('Failed to load comments'),
+                    );
+                  } else if (snapshot.data!.isEmpty) {
+                    return const Center(
+                      child: Text("No comments yet."),
+                    );
+                  } else {
+                    final comments = snapshot.data as List<CommentModel>;
+
+                    return ListView.builder(
+                      itemCount: comments.length,
+                      itemBuilder: (context, index) {
+                        final comment = comments[index];
+                        return CommentWidget(
+                          comment: comment,
+                        );
+                      },
+                    );
                   }
                 },
-                icon: const Icon(Icons.send),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
               ),
             ),
-          )
-        ],
+            const SizedBox(
+              height: 12,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: TextField(
+                controller: _commentController,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 12,
+                  ),
+                  hintText: 'Add a comment',
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      if (_commentController.text.isNotEmpty) {
+                        FocusScope.of(context).unfocus();
+                        addComment();
+                        setState(() {});
+                      }
+                    },
+                    icon: const Icon(Icons.send),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

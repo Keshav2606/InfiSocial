@@ -20,6 +20,9 @@ class _CommentButtonState extends State<CommentButton> {
       context: context,
       enableDrag: true,
       showDragHandle: true,
+      isDismissible: true,
+      backgroundColor: Colors.black,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (context) {
         return CommentsPage(
           postId: widget.postId,

@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:infi_social/pages/profile_page.dart';
 import 'package:infi_social/pages/tag_posts_page.dart';
+import 'package:infi_social/services/api_service.dart';
 import 'package:infi_social/widgets/like_button_widget.dart';
 import 'package:infi_social/widgets/share_button_widget.dart';
 import 'package:infi_social/widgets/user_profile_widget.dart';
@@ -16,26 +20,25 @@ class PostWidget extends StatefulWidget {
     required this.postedBy,
     required this.likes,
     required this.comments,
-    required this.postOwnerUsername,
     this.postOwnerAvatar,
+    required this.postOwnerUsername,
   });
 
   final String postId;
-  final String? mediaUrl;
-  final String postedBy;
-  final String caption;
-  final List<String> likes;
   final List comments;
-  final String postOwnerUsername;
+  final String caption;
+  final String postedBy;
+  final String? mediaUrl;
+  final List<String> likes;
   final String? postOwnerAvatar;
+  final String postOwnerUsername;
 
   @override
   State<PostWidget> createState() => _PostWidgetState();
 }
 
 class _PostWidgetState extends State<PostWidget> {
-  // Function to build caption with highlighted hashtags
-  Widget _buildCaption(String text) {
+  Widget _buildCaption(String text, BuildContext context) {
     if (text.isEmpty) {
       return const Text(
         'No caption',
@@ -46,37 +49,83 @@ class _PostWidgetState extends State<PostWidget> {
     }
 
     final hashtagRegex = RegExp(r'#[a-zA-Z][a-zA-Z0-9_]*');
-    final parts = text.split(hashtagRegex);
-    final matches =
-        hashtagRegex.allMatches(text).map((m) => m.group(0)).toList();
+    final usertagRegex = RegExp(r'@[a-zA-Z0-9_]+');
+    final List<Map<String, Object>> allMatches = [
+      ...hashtagRegex.allMatches(text).map((m) => {
+            'text': m.group(0)!,
+            'start': m.start,
+            'type': 'hashtag',
+          }),
+      ...usertagRegex.allMatches(text).map((m) => {
+            'text': m.group(0)!,
+            'start': m.start,
+            'type': 'usertag',
+          }),
+    ]..sort((a, b) => a['start']!.toString().compareTo(b['start']!.toString()));
 
     List<TextSpan> spans = [];
-    int partIndex = 0;
+    int lastEnd = 0;
 
-    for (var i = 0; i < parts.length + matches.length; i++) {
-      if (i % 2 == 0 && partIndex < parts.length) {
-        spans.add(TextSpan(text: parts[partIndex]));
-        partIndex++;
-      } else if (i % 2 == 1 && (i ~/ 2) < matches.length) {
-        spans.add(TextSpan(
-          text: matches[i ~/ 2],
-          style: const TextStyle(
-            color: Colors.blue,
-            fontWeight: FontWeight.bold,
-          ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
+    for (var match in allMatches) {
+      final start = match['start']!;
+      final matchedText = match['text']!;
+      final type = match['type']!;
+
+      // Add text before the match
+      if (start as int > lastEnd) {
+        spans.add(TextSpan(text: text.substring(lastEnd, start)));
+      }
+
+      // Add hashtag or usertag
+      spans.add(TextSpan(
+        text: matchedText as String,
+        style: const TextStyle(
+          color: Colors.blue,
+          fontWeight: FontWeight.bold,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            if (type == 'hashtag') {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => TagPostsScreen(
-                    tag: matches[i ~/ 2]!.substring(1),
+                    tag: matchedText.substring(1),
                   ),
                 ),
               );
-            },
-        ));
-      }
+            } else if (type == 'usertag') {
+              final response = await http.get(Uri.parse(
+                  "${ApiService.baseUrl}/users/search?query=${matchedText.substring(1)}"));
+
+              if (response.statusCode == 200) {
+                final user = jsonDecode(response.body)[0];
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfilePage(
+                      userId: user["_id"],
+                    ),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Unable to find user."),
+                  ),
+                );
+              }
+            }
+          },
+      ));
+
+      lastEnd = start + matchedText.length;
+    }
+
+    // Add remaining text
+    if (lastEnd < text.length) {
+      spans.add(TextSpan(text: text.substring(lastEnd)));
     }
 
     return RichText(
@@ -130,7 +179,7 @@ class _PostWidgetState extends State<PostWidget> {
           // Caption row with hashtag highlighting
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: _buildCaption(widget.caption),
+            child: _buildCaption(widget.caption, context),
           ),
           const SizedBox(
             height: 6,

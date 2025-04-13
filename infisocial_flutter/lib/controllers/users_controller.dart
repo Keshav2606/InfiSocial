@@ -101,4 +101,34 @@ class UsersController {
       return null;
     }
   }
+
+  static Future<bool> followUser({required String userId, required String followUserId}) async {
+    try {
+      final apiUrl = Uri.parse("${ApiService.baseUrl}/users/follow");
+
+      final requestBody = {
+        "userId": userId,
+        "followUserId": followUserId,
+      };
+
+      final response = await http.post(
+        apiUrl,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+      return true;
+
+      } else {
+        debugPrint("Failed to toggle like: ${response.body} ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    }
+  }
 }

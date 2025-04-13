@@ -24,6 +24,7 @@ class _ProfilePageState extends State<ProfilePage> {
   UserModel? currentUser;
   XFile? _image;
   String? avatarUrl;
+  bool isFollowing = false;
   List<PostModel> userPosts = [];
 
   @override
@@ -40,6 +41,12 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() {
       user = _user;
     });
+
+    if (user!.followers.contains(currentUser!.id)) {
+      setState(() {
+        isFollowing = true;
+      });
+    }
   }
 
   void getUserPosts() async {
@@ -364,20 +371,32 @@ class _ProfilePageState extends State<ProfilePage> {
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton(
-                                      onPressed: () {
-                                        // Navigator.push(
-                                        //   context,
-                                        //   MaterialPageRoute(
-                                        //     builder: (context) =>
-                                        //         const MenuPage(),
-                                        //   ),
-                                        // );
+                                      onPressed: () async {
+                                        final bool isSuccess =
+                                            await UsersController.followUser(
+                                                userId: currentUser!.id!,
+                                                followUserId: user!.id!);
+
+                                        if (isSuccess) {
+                                          setState(() {
+                                            isFollowing = true;
+                                          });
+                                        } else {
+                                          setState(() {
+                                            isFollowing = false;
+                                          });
+                                        }
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        backgroundColor: Colors.blue,
+                                        foregroundColor: isFollowing
+                                            ? Colors.black45
+                                            : Colors.white,
+                                        backgroundColor: isFollowing
+                                            ? Colors.blue[100]
+                                            : Colors.blue,
                                       ),
-                                      child: const Text('Follow'),
+                                      child: Text(
+                                          isFollowing ? 'Following' : 'Follow'),
                                     ),
                                   ),
                               ],

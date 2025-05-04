@@ -149,153 +149,184 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/images/infiSocialLogo.png',
-                      height: 120,
-                    ),
-                    const Text(
-                      'InfiSocial',
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.w800),
-                    ),
-                  ],
-                ),
-                const SizedBox(
-                  height: 50,
-                ),
-                CustomTextField(
-                  controller: _emailController,
-                  hintText: 'Enter Email',
-                  labelText: 'Email',
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: !_isPasswordVisible,
-                  decoration: InputDecoration(
-                    label: const Text('Password'),
-                    hintText: 'Enter Password',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _isPasswordVisible = !_isPasswordVisible;
-                        });
-                      },
-                      child: Icon(
-                        _isPasswordVisible
-                            ? FontAwesomeIcons.eyeSlash
-                            : FontAwesomeIcons.eye,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 35.0,
-                ),
-                ElevatedButton(
-                  onPressed: _signIn,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: Row(
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        body: Center(
+          child: SingleChildScrollView(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Login'),
-                      SizedBox(width: 12),
-                      if (_isLogging)
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12.0),
+                        clipBehavior: Clip.hardEdge,
+                        child: Image.asset(
+                          'assets/images/infiSocialLogo.png',
+                          height: 120,
                         ),
-                    ],
-                  ),
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have an account? "),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SignupPage()),
-                        );
-                      },
-                      child: const Text(
-                        'Signup',
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      const Text(
+                        'Welcome Back! 👋',
                         style: TextStyle(
-                            color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
-                    )
-                  ],
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  children: [
-                    const Expanded(child: Divider(thickness: 1)),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Or continue with',
-                    ),
-                    const SizedBox(width: 8),
-                    const Expanded(child: Divider(thickness: 1)),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                OutlinedButton.icon(
-                  onPressed: _signInWithGoogle,
-                  icon: Image.asset(
-                    'assets/images/google_logo.png',
-                    height: 24,
-                    width: 24,
-                  ),
-                  label: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text('Google'),
-                      SizedBox(width: 12),
-                      if (_isLoggingWithGoogle)
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
+                      ),
                     ],
                   ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  CustomTextField(
+                    controller: _emailController,
+                    hintText: 'Enter Email',
+                    labelText: 'Email',
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Email can't be empty";
+                      } else if (!value.contains(
+                          RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'))) {
+                        return 'Please enter a vaild email address';
+                      } else {
+                        return null;
+                      }
+                    },
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: !_isPasswordVisible,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return "Password can't be empty";
+                      } else {
+                        return null;
+                      }
+                    },
+                    decoration: InputDecoration(
+                      label: const Text('Password'),
+                      hintText: 'Enter Password',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _isPasswordVisible = !_isPasswordVisible;
+                          });
+                        },
+                        child: Icon(
+                          _isPasswordVisible
+                              ? FontAwesomeIcons.eyeSlash
+                              : FontAwesomeIcons.eye,
+                          size: 20,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(
+                    height: 35.0,
+                  ),
+                  ElevatedButton(
+                    onPressed: _signIn,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Login'),
+                        SizedBox(width: 12),
+                        if (_isLogging)
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have an account? "),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const SignupPage()),
+                          );
+                        },
+                        child: const Text(
+                          'Signup',
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold),
+                        ),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 30),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider(thickness: 1)),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Or continue with',
+                      ),
+                      const SizedBox(width: 8),
+                      const Expanded(child: Divider(thickness: 1)),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  OutlinedButton.icon(
+                    onPressed: _signInWithGoogle,
+                    icon: Image.asset(
+                      'assets/images/google_logo.png',
+                      height: 24,
+                      width: 24,
+                    ),
+                    label: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('Google'),
+                        SizedBox(width: 12),
+                        if (_isLoggingWithGoogle)
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(),
+                          ),
+                      ],
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

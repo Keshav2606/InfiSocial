@@ -16,7 +16,7 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await ConfigService.fetchApiKey();
-  CloudinaryObject.fromCloudName(cloudName: 'dzr6atmmi');
+  CloudinaryObject.fromCloudName(cloudName: ConfigService.cloudinaryCloudName);
 
   final appDocumentDir = await getApplicationDocumentsDirectory();
   Hive.init(appDocumentDir.path);

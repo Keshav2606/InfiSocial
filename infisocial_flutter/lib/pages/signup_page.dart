@@ -76,9 +76,12 @@ class _SignupPageState extends State<SignupPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        body: Center(
           child: Container(
             margin: const EdgeInsets.symmetric(
               horizontal: 20,
@@ -93,173 +96,246 @@ class _SignupPageState extends State<SignupPage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(
-                      'assets/images/infiSocialLogo.png',
-                      height: 120,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12.0),
+                      clipBehavior: Clip.hardEdge,
+                      child: Image.asset(
+                        'assets/images/infiSocialLogo.png',
+                        height: 120,
+                      ),
                     ),
-                    const Text(
-                      'InfiSocial',
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    Text(
+                      'Create an Account',
                       style: TextStyle(
-                        fontSize: 25,
-                        fontWeight: FontWeight.w800,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(
-                  height: 50,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 6,
-                  ),
-                  child: Column(
-                    children: [
-                      CustomTextField(
-                        controller: _firstNameController,
-                        hintText: 'Enter your First Name',
-                        labelText: 'First Name',
+                const SizedBox(height: 50),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 6,
                       ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      CustomTextField(
-                        controller: _lastNameController,
-                        hintText: 'Enter your Last Name',
-                        labelText: 'Last Name',
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      CustomTextField(
-                        controller: _userNameController,
-                        hintText: 'Enter Username',
-                        labelText: 'Username',
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      CustomTextField(
-                        controller: _emailController,
-                        hintText: 'Enter your Email Address',
-                        labelText: 'Email Id',
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      CustomTextField(
-                        controller: _ageController,
-                        hintText: 'Enter your Age',
-                        labelText: 'Age',
-                        keyboardType: TextInputType.number,
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      DropdownButtonFormField(
-                        value: selectedGender,
-                        isExpanded: true,
-                        borderRadius: BorderRadius.circular(8),
-                        hint: const Text('Select Gender'),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                        items: Gender.values
-                            .map(
-                              (gender) => DropdownMenuItem(
-                                value: gender,
-                                child: Text(gender.name.toUpperCase()),
-                              ),
-                            )
-                            .toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            selectedGender = value!;
-                          });
-                        },
-                      ),
-                      const SizedBox(
-                        height: 30,
-                      ),
-                      TextField(
-                        controller: _passwordController,
-                        obscureText: !_isPasswordVisible,
-                        decoration: InputDecoration(
-                          label: const Text('Password'),
-                          hintText: 'Create Password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          suffixIcon: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _isPasswordVisible = !_isPasswordVisible;
-                              });
-                            },
-                            child: Icon(
-                              _isPasswordVisible
-                                  ? FontAwesomeIcons.eyeSlash
-                                  : FontAwesomeIcons.eye,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 35.0,
-                      ),
-                      ElevatedButton(
-                        onPressed: signup,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text('Signup'),
-                            SizedBox(width: 12),
-                            if (_isSigningUp)
-                              SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(),
-                              ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      child: Column(
                         children: [
-                          const Text('Already have an account? '),
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const LoginPage()),
-                              );
+                          CustomTextField(
+                            controller: _firstNameController,
+                            hintText: 'Enter your First Name',
+                            labelText: 'First Name',
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return "First Name can't be empty";
+                              } else {
+                                return null;
+                              }
                             },
-                            child: const Text(
-                              'Login',
-                              style: TextStyle(
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          CustomTextField(
+                            controller: _lastNameController,
+                            hintText: 'Enter your Last Name',
+                            labelText: 'Last Name',
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          CustomTextField(
+                            controller: _userNameController,
+                            hintText: 'Enter Username',
+                            labelText: 'Username',
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return "Username can't be empty";
+                              } else if (value.contains(" ")) {
+                                return "Username cannot contain spaces";
+                              } else if (value.trim().length < 4) {
+                                return "Username must be at least 4 characters long";
+                              } else if (value.trim().length > 20) {
+                                return "Username can't be more than 20 characters";
+                              } else if (!RegExp(r'^[a-zA-Z0-9_]+$')
+                                  .hasMatch(value.trim())) {
+                                return "Only letters, numbers, and underscores allowed";
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          CustomTextField(
+                            controller: _emailController,
+                            hintText: 'Enter your Email Address',
+                            labelText: 'Email',
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return "Email can't be empty";
+                              } else if (!value.contains(RegExp(
+                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$'))) {
+                                return 'Please enter a vaild email address';
+                              } else {
+                                return null;
+                              }
+                            },
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: CustomTextField(
+                                  controller: _ageController,
+                                  hintText: 'Enter your Age',
+                                  labelText: 'Age',
+                                  keyboardType: TextInputType.number,
+                                  validator: (value) {
+                                    if (value == null || value.trim().isEmpty) {
+                                      return "Age can't be empty";
+                                    }
+                                    final age = int.tryParse(value.trim());
+                                    if (age == null) {
+                                      return "Please enter a valid number";
+                                    } else if (age <= 0) {
+                                      return "Age must be greater than 0";
+                                    } else if (age > 120) {
+                                      return "Enter a valid age (1–120)";
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 12,
+                              ),
+                              Expanded(
+                                child: DropdownButtonFormField(
+                                  value: selectedGender,
+                                  isExpanded: true,
+                                  borderRadius: BorderRadius.circular(8),
+                                  hint: const Text('Select Gender'),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  items: Gender.values
+                                      .map(
+                                        (gender) => DropdownMenuItem(
+                                          value: gender,
+                                          child: Text(
+                                            gender.name.toUpperCase(),
+                                          ),
+                                        ),
+                                      )
+                                      .toList(),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      selectedGender = value!;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                          TextFormField(
+                            controller: _passwordController,
+                            obscureText: !_isPasswordVisible,
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return "Password can't be empty";
+                              } else {
+                                return null;
+                              }
+                            },
+                            decoration: InputDecoration(
+                              label: const Text('Password'),
+                              hintText: 'Create Password',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              suffixIcon: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _isPasswordVisible = !_isPasswordVisible;
+                                  });
+                                },
+                                child: Icon(
+                                  _isPasswordVisible
+                                      ? FontAwesomeIcons.eyeSlash
+                                      : FontAwesomeIcons.eye,
+                                  size: 20,
+                                ),
+                              ),
                             ),
-                          )
+                          ),
+                          const SizedBox(
+                            height: 35.0,
+                          ),
+                          ElevatedButton(
+                            onPressed: signup,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Signup'),
+                                SizedBox(width: 12),
+                                if (_isSigningUp)
+                                  SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Text('Already have an account? '),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginPage()),
+                                  );
+                                },
+                                child: const Text(
+                                  'Login',
+                                  style: TextStyle(
+                                      color: Colors.blue,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              )
+                            ],
+                          ),
                         ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ],

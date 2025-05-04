@@ -45,6 +45,10 @@ exports.handler = async (event) => {
             const body = JSON.parse(event.body);
             return await addComment(body);
         }
+        else if (httpMethod === "GET" && path === "/posts") {
+            const tag = event.queryStringParameters.tag;
+            return await getPostsByTag(tag);
+        }
         else if (httpMethod === "GET" && path === "/posts/get-comments") {
             const queryParams = event.queryStringParameters;
             return await getCommentsByPostId(queryParams);
@@ -63,19 +67,43 @@ exports.handler = async (event) => {
     }
 };
 
+const extractHashtags = (content) => {
+    if (!content) return [];
+    const hashtagRegex = /#[a-zA-Z0-9_]+/g;
+    const hashtags = content.match(hashtagRegex) || [];
+    return [...new Set(hashtags.map(tag => tag.replace('#', '').toLowerCase()))];
+};
+
+const extractTaggedUsers = async (content) => {
+    if (!content) return [];
+    const tagRegex = /@[a-zA-Z0-9_]+/g;
+    const tags = content.match(tagRegex) || [];
+    const usernames = tags.map(tag => tag.replace('@', '').toLowerCase());
+
+    // Find users by usernames
+    const users = await User.find({ username: { $in: usernames } }).select('_id');
+    return users.map(user => user._id);
+};
+
 const addPost = async (body) => {
-    const { userId, content, mediaUrl, mediaType, tags } = body;
+    const { userId, content, mediaUrl, mediaType } = body;
 
     if (!content && !mediaUrl) {
         return buildResponse(400, { message: "Content or media is required" });
     }
+
+    const tags = extractHashtags(content);
+    console.log("Tags extracted: ", tags);
+    const taggedUsers = await extractTaggedUsers(content);
+    console.log("Tagged Users: ", taggedUsers);
 
     const newPost = new Post({
         postedBy: userId,
         content,
         mediaUrl,
         mediaType,
-        tags
+        tags,
+        taggedUsers,
     });
 
     await newPost.save();
@@ -85,13 +113,17 @@ const addPost = async (body) => {
 
 const getAllPosts = async () => {
     try {
-        const posts = await Post.find({ isActive: true }).populate("postedBy");
+        const posts = await Post.find({ isActive: true })
+            .populate('postedBy', 'username avatarUrl')
+            .sort({ createdAt: -1 });
 
-        if (!posts) {
-            return buildResponse(404, { message: "No posts found" });
+        if (!posts || posts.length === 0) {
+            return buildResponse(404, { message: 'No posts found' });
         }
+
         return buildResponse(200, { posts });
     } catch (error) {
+        console.error('Error fetching posts:', error);
         return buildResponse(500, { error: error.message });
     }
 };
@@ -99,7 +131,9 @@ const getAllPosts = async () => {
 const getUserPosts = async (queryParams) => {
     const { userId } = queryParams;
 
-    const posts = await Post.find({ postedBy: userId, isActive: true }).populate("postedBy");
+    const posts = await Post.find({ postedBy: userId, isActive: true })
+        .populate("postedBy", "username avatarUrl")
+        .sort({ createdAt: -1 });
 
     if (!posts) {
         return buildResponse(404, { message: "No posts found" });
@@ -142,10 +176,13 @@ const addComment = async (body) => {
             return buildResponse(404, { message: "Post not found" });
         }
 
+        const taggedUsers = await extractTaggedUsers(content);
+
         const comment = new Comment({
             userId,
             postId,
             content,
+            taggedUsers
         });
 
         const savedComment = await comment.save();
@@ -173,6 +210,26 @@ const getCommentsByPostId = async (queryParams) => {
         const comments = await Comment.find({ postId, isActive: true }).populate("userId");
 
         return buildResponse(200, { comments });
+    } catch (error) {
+        return buildResponse(500, { error: error.message });
+    }
+};
+
+const getPostsByTag = async (tag) => {
+    try {
+        if (!tag) {
+            return buildResponse(400, { message: "Tag is required" });
+        }
+
+        const posts = await Post.find({ tags: tag, isActive: true })
+            .populate("postedBy", "username avatarUrl")
+            .sort({ createdAt: -1 });
+
+        if (!posts || posts.length === 0) {
+            return buildResponse(404, { message: "No posts found" });
+        }
+
+        return buildResponse(200, posts);
     } catch (error) {
         return buildResponse(500, { error: error.message });
     }

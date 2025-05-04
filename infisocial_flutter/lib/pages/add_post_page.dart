@@ -27,7 +27,7 @@ class _AddPostPageState extends State<AddPostPage> {
   final TextEditingController _captionController = TextEditingController();
   bool _isLoading = false;
   List<Map<String, dynamic>> _suggestions = [];
-  bool _showSuggestions = false;
+  // bool _showSuggestions = false;
   String _currentQuery = '';
   OverlayEntry? _overlayEntry;
   final FocusNode _focusNode = FocusNode();
@@ -97,7 +97,7 @@ class _AddPostPageState extends State<AddPostPage> {
     if (query.isEmpty) {
       setState(() {
         _suggestions = [];
-        _showSuggestions = false;
+        // _showSuggestions = false;
       });
       _removeOverlay();
       return;
@@ -113,20 +113,20 @@ class _AddPostPageState extends State<AddPostPage> {
         final List<dynamic> data = jsonDecode(response.body);
         setState(() {
           _suggestions = data.cast<Map<String, dynamic>>();
-          _showSuggestions = true;
+          // _showSuggestions = true;
         });
         _showOverlay();
       } else {
         setState(() {
           _suggestions = [];
-          _showSuggestions = false;
+          // _showSuggestions = false;
         });
         _removeOverlay();
       }
     } catch (error) {
       setState(() {
         _suggestions = [];
-        _showSuggestions = false;
+        // _showSuggestions = false;
       });
       _removeOverlay();
     }
@@ -219,7 +219,7 @@ class _AddPostPageState extends State<AddPostPage> {
 
     setState(() {
       _suggestions = [];
-      _showSuggestions = false;
+      // _showSuggestions = false;
     });
     _removeOverlay();
   }
@@ -349,7 +349,6 @@ class _AddPostPageState extends State<AddPostPage> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    // Caption input with suggestions
                     CompositedTransformTarget(
                       link: _layerLink,
                       child: TextFormField(
@@ -368,7 +367,6 @@ class _AddPostPageState extends State<AddPostPage> {
                               _captionController.selection.baseOffset;
                           if (cursorPos < 0) return;
 
-                          // Detect @ and extract query
                           int start = cursorPos - 1;
                           bool isAtSymbol = false;
                           while (start >= 0 && value[start] != ' ') {
@@ -389,7 +387,6 @@ class _AddPostPageState extends State<AddPostPage> {
                             _currentQuery = '';
                             setState(() {
                               _suggestions = [];
-                              _showSuggestions = false;
                             });
                             _removeOverlay();
                           }

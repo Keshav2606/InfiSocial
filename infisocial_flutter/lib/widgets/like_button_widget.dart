@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:infi_social/models/user_model.dart';
 import 'package:infi_social/services/auth_service.dart';
@@ -18,15 +19,20 @@ class _LikeButtonState extends State<LikeButton> {
   bool isLiked = false;
   UserModel? currentUser;
 
-  Future<void> getCurrentUser() async {
-    final AuthService authService =
-        Provider.of<AuthService>(context, listen: false);
+  @override
+  void initState() {
+    currentUser = Provider.of<AuthService>(context, listen: false).user;
+    checkIsLiked();
 
-    setState(() {
-      currentUser = authService.user;
-    });
+    super.initState();
+  }
 
-    debugPrint("Current User after parsing: $currentUser");
+  void checkIsLiked() async {
+    if (mounted) {
+      setState(() {
+        isLiked = widget.postLikes.contains(currentUser!.id);
+      });
+    }
   }
 
   void togglePostLike() async {
@@ -58,31 +64,18 @@ class _LikeButtonState extends State<LikeButton> {
     }
   }
 
-  void checkIsLiked() async {
-    if (mounted) {
-      setState(() {
-        isLiked = widget.postLikes.contains(currentUser!.id);
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    getCurrentUser();
-
-    Future.delayed(Duration(milliseconds: 1200), () {
-      checkIsLiked();
-    });
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: togglePostLike,
-      icon: Icon(
-        isLiked ? Icons.thumb_up_sharp : Icons.thumb_up_alt_outlined,
-      ),
+      icon: isLiked
+          ? Icon(
+              FontAwesomeIcons.solidHeart,
+              color: Colors.red,
+            )
+          : Icon(
+              FontAwesomeIcons.heart,
+            ),
     );
   }
 }

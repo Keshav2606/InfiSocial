@@ -39,6 +39,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 
   @override
+  void dispose() {
+    _channelListController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: StreamChannelListHeader(
@@ -66,16 +72,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
           ),
         ],
       ),
-      body: StreamChannelListView(
-        controller: _channelListController,
-        onChannelTap: (channel) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ChatScreen(channel: channel),
-            ),
-          );
-        },
+      body: RefreshIndicator(
+        onRefresh: _channelListController.refresh,
+        child: StreamChannelListView(
+          controller: _channelListController,
+          onChannelTap: (channel) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ChatScreen(channel: channel),
+              ),
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

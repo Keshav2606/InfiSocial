@@ -40,7 +40,6 @@ class _StartPageState extends State<StartPage> {
           user.username,
           user.avatarUrl,
         );
-        
       } catch (e) {
         debugPrint("Stream Chat Connection Failed: $e");
       }
@@ -66,21 +65,20 @@ class _StartPageState extends State<StartPage> {
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Colors.black,
-                Color.fromARGB(255, 1, 81, 146),
-              ],
-            ),
-          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(
-                'assets/images/infiSocialLogo.png',
-                height: 200,
-                fit: BoxFit.contain,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12.0),
+                clipBehavior: Clip.hardEdge,
+                child: Image.asset(
+                  'assets/images/infiSocialLogo.png',
+                  height: 200,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(
+                height: 30,
               ),
               RichText(
                 textScaler: TextScaler.linear(3),
@@ -88,7 +86,7 @@ class _StartPageState extends State<StartPage> {
                   children: [
                     TextSpan(
                       text: "Infi",
-                      style: TextStyle(color: Colors.blue),
+                      style: TextStyle(color: Colors.white),
                     ),
                     TextSpan(
                       text: "Social",

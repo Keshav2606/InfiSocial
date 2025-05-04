@@ -23,7 +23,6 @@ class PostModel {
     this.postOwnerAvatar,
   });
 
-  // Factory method to create a Post from a Map (useful for Firebase or API responses)
   factory PostModel.fromJson(Map<String, dynamic> json) {
     return PostModel(
       postId: json['_id'] ?? '',
@@ -38,7 +37,6 @@ class PostModel {
     );
   }
 
-  // Convert a Post object to a Map (useful for Firestore or API requests)
   Map<String, dynamic> toJson() {
     return {
       '_id': postId,

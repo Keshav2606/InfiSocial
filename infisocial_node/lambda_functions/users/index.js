@@ -52,10 +52,15 @@ exports.handler = async (event) => {
             const queryParams = event.queryStringParameters;
             return await generateStreamToken(queryParams);
         }
-        return {
-            statusCode: 404,
-            body: JSON.stringify({ error: "Route not found" }),
-        };
+        else if (httpMethod === "GET" && path === "/users/search") {
+            const query = event.queryStringParameters.query;
+            return await searchUser(query);
+        }
+        else if (httpMethod === "POST" && path === "/users/follow") {
+            const body = JSON.parse(event.body);
+            return await followUser(body);
+        }
+        return buildResponse(404, { error: "Route not found" } );
     }
     catch (error) {
         console.error("Error handling request:", error);
@@ -143,7 +148,6 @@ const userRegistration = async (body) => {
     }
 };
 
-
 const userLogin = async (body) => {
     const { email, password } = body;
 
@@ -176,7 +180,7 @@ const userLogin = async (body) => {
         const { idToken, localId } = data;
 
         // Retrieve user from Firestore or Database
-        const user = await User.findOne({_id: localId, isActive: true});
+        const user = await User.findOne({ _id: localId, isActive: true });
 
         if (!user) {
             return buildResponse(400, { message: "User not found in database." });
@@ -210,7 +214,7 @@ const googleLogin = async (body) => {
 
 
         // Check if user already exists in MongoDB
-        let user = await User.findOne({_id: uid, isActive: true});
+        let user = await User.findOne({ _id: uid, isActive: true });
 
         if (!user) {
             // Create a new user in MongoDB if they don't exist
@@ -243,7 +247,7 @@ const getUserById = async (queryParams) => {
             return buildResponse(400, { error: "User Id is required." });
         }
 
-        const user = await User.findOne({_id: userId, isActive: true});
+        const user = await User.findOne({ _id: userId, isActive: true });
 
         if (!user) {
             return buildResponse(400, { error: "User not found." });
@@ -273,7 +277,7 @@ const updateUser = async (body) => {
         if (!userId) {
             return buildResponse(400, { error: "User Id is required." });
         }
-        
+
         const user = await User.findByIdAndUpdate(userId, updateData, { new: true });
 
         if (!user) {
@@ -283,5 +287,52 @@ const updateUser = async (body) => {
         return buildResponse(200, { message: "User updated successfully!", user });
     } catch (error) {
         return buildResponse(500, { error: "Something went wrong, while updating user", details: error });
+    }
+};
+
+const searchUser = async (query) => {
+    try {
+        if (!query || typeof query !== 'string') {
+            return buildResponse(400, { error: 'Query is required' });
+        }
+
+        const users = await User.find({
+            username: { $regex: `^${query}`, $options: 'i' },
+            isActive: true,
+        })
+            .select('username avatarUrl')
+            .limit(10)
+            .lean();
+
+        return buildResponse(200, users);
+    } catch (error) {
+        console.error('Error searching users:', error);
+        return buildResponse(500, { error: 'Something went wrong while searching users' });
+    }
+};
+
+const followUser = async (body) => {
+    try {
+        const { userId, followUserId } = body;
+
+        if (!userId || !followUserId) {
+            return buildResponse(400, { error: "User Id and Follow User Id are required." });
+        }
+
+        const user1 = await User.findByIdAndUpdate(userId, { $addToSet: { following: followUserId } }, { new: true });
+
+        if (!user1) {
+            return buildResponse(400, { error: "User not found." });
+        }
+
+        const user2 = await User.findByIdAndUpdate(followUserId, { $addToSet: { followers: userId } }, { new: true });
+
+        if (!user2) {
+            return buildResponse(400, { error: "Follow User not found." });
+        }
+
+        return buildResponse(200, { message: "User followed successfully!", user });
+    } catch (error) {
+        return buildResponse(500, { error: "Something went wrong, while following user", details: error });
     }
 };

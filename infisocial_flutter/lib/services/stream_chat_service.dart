@@ -1,4 +1,5 @@
 import 'package:infi_social/controllers/stream_token_controller.dart';
+import 'package:infi_social/services/remote_config_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class StreamChatService {
@@ -6,7 +7,7 @@ class StreamChatService {
 
   Future<void> initialize() async {
     client = StreamChatClient(
-      'emsasgs8sk4j',
+      ConfigService.streamApiKey,
       logLevel: Level.INFO,
     );
   }

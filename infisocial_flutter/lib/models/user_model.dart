@@ -1,4 +1,3 @@
-// import 'package:flutter/material.dart';
 
 enum Gender { male, female, other }
 
@@ -29,9 +28,7 @@ class UserModel {
     this.following = const [],
   });
 
-  // Factory method to create a UserModel from JSON
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    // debugPrint("UserModel.fromJson: $json");
     final _user = UserModel(
       id: json['_id'].toString(),
       firstName: json['firstName'],
@@ -45,11 +42,9 @@ class UserModel {
       followers: List<String>.from(json['followers']),
       following: List<String>.from(json['following']),
     );
-    // debugPrint("User in user model: $_user");
     return _user;
   }
 
-  // Convert UserModel to JSON (for sending to backend)
   Map<String, dynamic> toJson() {
     return {
       "_id": id,

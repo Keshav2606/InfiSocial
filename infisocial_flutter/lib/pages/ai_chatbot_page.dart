@@ -91,7 +91,8 @@ class _AIChatbotPageState extends State<AIChatbotPage> {
             (data as List).map<Map<String, String>>((msg) => {
                   'sender': msg['sender'].toString(),
                   'message': msg['message'].toString(),
-                  'timestamp': msg['timestamp'].toString(),
+                  'timestamp':
+                      DateTime.parse(msg['timestamp']).toLocal().toString(),
                 }),
           );
         });

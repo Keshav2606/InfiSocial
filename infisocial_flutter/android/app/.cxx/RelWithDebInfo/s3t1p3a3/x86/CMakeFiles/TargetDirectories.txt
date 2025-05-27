@@ -1,0 +1,2 @@
+C:/Users/KESHAVKUMAR/Documents/InfiSocial/InfiSocial/infisocial_flutter/android/app/.cxx/RelWithDebInfo/s3t1p3a3/x86/CMakeFiles/edit_cache.dir
+C:/Users/KESHAVKUMAR/Documents/InfiSocial/InfiSocial/infisocial_flutter/android/app/.cxx/RelWithDebInfo/s3t1p3a3/x86/CMakeFiles/rebuild_cache.dir

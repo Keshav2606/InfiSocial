@@ -121,7 +121,7 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updateUser({
+  Future<UserModel?> updateUser({
     required String userId,
     required Map<String, dynamic> updateData,
   }) async {
@@ -137,6 +137,9 @@ class AuthService extends ChangeNotifier {
 
         _user = user;
         notifyListeners();
+        return user;
+      }else{
+        return null;
       }
     } catch (e) {
       rethrow;

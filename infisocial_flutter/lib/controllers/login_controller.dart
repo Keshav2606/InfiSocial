@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:infi_social/models/user_model.dart';
@@ -47,9 +48,13 @@ class SignInController {
     try {
       final apiUrl = Uri.parse("${ApiService.baseUrl}/users/login");
 
+      final box = await Hive.openBox("userData");
+      final token = await box.get("deviceToken");
+
       final requestBody = {
         "email": email,
         "password": password,
+        "deviceToken": token,
       };
 
       final response = await http.post(
@@ -63,13 +68,7 @@ class SignInController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = json.decode(response.body)['user'];
 
-        // debugPrint("Response Body of Login: $responseBody");
-
-        // debugPrint("debug Hii 1");
-
         final user = UserModel.fromJson(responseBody);
-
-        // debugPrint("debug Hii 2");
 
         return user;
       } else {
@@ -90,8 +89,12 @@ class SignInController {
     try {
       final apiUrl = Uri.parse("${ApiService.baseUrl}/users/google-login");
 
+      final box = await Hive.openBox("userData");
+      final token = await box.get("deviceToken");
+
       final requestBody = {
         "idToken": idToken,
+        "deviceToken": token,
       };
 
       final response = await http.post(
@@ -104,7 +107,6 @@ class SignInController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final responseBody = json.decode(response.body)['user'];
-        // debugPrint("Response Body of Google Login: $responseBody");
 
         final user = UserModel.fromJson(responseBody);
 
@@ -117,7 +119,6 @@ class SignInController {
       }
     } catch (e) {
       debugPrint(e.toString());
-
       return null;
     }
   }

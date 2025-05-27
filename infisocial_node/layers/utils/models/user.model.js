@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    deviceToken: {
+        type: String,
+        default: null
+    },
     followers: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: "User",

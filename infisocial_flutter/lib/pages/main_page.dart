@@ -7,7 +7,6 @@ import 'package:infi_social/pages/add_post_page.dart';
 import 'package:infi_social/services/auth_service.dart';
 import 'package:infi_social/pages/ai_chatbot_page.dart';
 import 'package:infi_social/pages/chats_list_page.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -59,11 +58,11 @@ class _MainPageState extends State<MainPage> {
           type: BottomNavigationBarType.fixed,
           selectedIconTheme: IconThemeData(
             size: 25,
-            color: Theme.of(context).disabledColor,
+            color: Theme.of(context).indicatorColor,
           ),
           unselectedIconTheme: IconThemeData(
             size: 25,
-            color: Theme.of(context).focusColor,
+            color: Theme.of(context).primaryColorLight,
           ),
           showSelectedLabels: false,
           showUnselectedLabels: false,
@@ -71,13 +70,22 @@ class _MainPageState extends State<MainPage> {
             onItemTapped(index);
           },
           items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(
-                icon: Icon(Icons.chat_rounded), label: 'Chat'),
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
             BottomNavigationBarItem(
-                icon: Icon(Icons.add_box_outlined), label: 'Add Post'),
+              icon: Icon(Icons.chat_rounded),
+              label: 'Chat',
+            ),
             BottomNavigationBarItem(
-                icon: Icon(FontAwesomeIcons.brain), label: 'InfiBot'),
+              icon: Icon(Icons.add_box_outlined),
+              label: 'Add Post',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.smart_toy),
+              label: 'InfiBot',
+            ),
             BottomNavigationBarItem(
               icon:
                   currentUser!.avatarUrl != null && currentUser!.avatarUrl != ''
@@ -85,7 +93,10 @@ class _MainPageState extends State<MainPage> {
                           width: 34,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2),
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 2,
+                            ),
                           ),
                           clipBehavior: Clip.hardEdge,
                           child: Image.network(
@@ -94,10 +105,6 @@ class _MainPageState extends State<MainPage> {
                           ),
                         )
                       : Icon(Icons.person),
-              // UserProfileWidget(
-              //   userId: currentUser!.id!,
-              //   avatar: currentUser!.avatarUrl!,
-              // ),
               label: 'Profile',
             ),
           ],

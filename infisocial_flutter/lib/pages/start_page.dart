@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:infi_social/pages/main_page.dart';
 import 'package:infi_social/pages/login_page.dart';
 import 'package:infi_social/services/auth_service.dart';
@@ -40,6 +41,11 @@ class _StartPageState extends State<StartPage> {
           user.username,
           user.avatarUrl,
         );
+
+        final box = await Hive.openBox('userData');
+        final token = await box.get('deviceToken');
+        await streamChatService.addDevice(token);
+
       } catch (e) {
         debugPrint("Stream Chat Connection Failed: $e");
       }

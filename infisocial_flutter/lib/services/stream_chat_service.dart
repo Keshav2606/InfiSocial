@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:infi_social/controllers/stream_token_controller.dart';
 import 'package:infi_social/services/remote_config_service.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -8,9 +9,26 @@ class StreamChatService {
   Future<void> initialize() async {
     client = StreamChatClient(
       ConfigService.streamApiKey,
-      logLevel: Level.INFO,
+      logLevel: Level.OFF,
     );
   }
+
+  Future<void> addDevice(token) async {
+    if (client != null) {
+      await client!.addDevice(
+        token,
+        PushProvider.firebase,
+        pushProviderName: 'FirebaseServiceAccount',
+      );
+    }
+  }
+
+  // Future<void> listDevices() async {
+  //   final deviceResponse = await client!.getDevices();
+  //   final devices = deviceResponse.devices.first.toString();
+
+  //   debugPrint("Stream Devices: $devices");
+  // }
 
   Future<void> connectUser(String userId, String name, String? image) async {
     if (client == null) {

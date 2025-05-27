@@ -77,6 +77,34 @@ class PostsController {
     }
   }
 
+  static Future<PostModel?> getPostById(String postId) async {
+    try {
+      final apiUrl = Uri.parse("${ApiService.baseUrl}/post");
+
+      final response = await http.get(
+        apiUrl.replace(queryParameters: { "postId": postId }),
+        headers: {"Content-Type": "application/json"},
+        // body: json.encode(requestBody),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // debugPrint("Posts fetched successfully: ${response.body}");
+
+        final responseBody = json.decode(response.body)['post'];
+
+        PostModel formattedData = PostModel.fromJson(responseBody);
+
+        return formattedData;
+      } else {
+        debugPrint("Failed to fetch posts: ${response.body} ${response.body}");
+        return null;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      return null;
+    }
+  }
+
   static Future<List<PostModel>> getUserPosts(String userId) async {
     try {
       final apiUrl = Uri.parse("${ApiService.baseUrl}/posts/get-user-posts");

@@ -320,8 +320,8 @@ class _SignupPageState extends State<SignupPage> {
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            const LoginPage()),
+                                      builder: (context) => const LoginPage(),
+                                    ),
                                   );
                                 },
                                 child: const Text(

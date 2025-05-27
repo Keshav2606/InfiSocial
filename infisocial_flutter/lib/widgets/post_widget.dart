@@ -222,10 +222,6 @@ class _PostWidgetState extends State<PostWidget> {
                   ],
                 ),
               ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.save_alt_outlined),
-              ),
             ],
           ),
         ],

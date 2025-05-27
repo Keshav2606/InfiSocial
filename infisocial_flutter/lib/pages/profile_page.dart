@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 import 'package:infi_social/controllers/posts_controller.dart';
 import 'package:infi_social/controllers/users_controller.dart';
 import 'package:infi_social/models/post_model.dart';
 import 'package:infi_social/models/user_model.dart';
+import 'package:infi_social/pages/edit_profile_page.dart';
 import 'package:infi_social/pages/menu_page.dart';
 import 'package:infi_social/services/auth_service.dart';
-import 'package:infi_social/utils/functions/pick_image.dart';
-import 'package:infi_social/services/storage_service.dart';
+// import 'package:infi_social/utils/functions/pick_image.dart';
+// import 'package:infi_social/services/storage_service.dart';
 import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -22,7 +23,7 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   UserModel? user;
   UserModel? currentUser;
-  XFile? _image;
+  // XFile? _image;
   String? avatarUrl;
   bool isFollowing = false;
   List<PostModel> userPosts = [];
@@ -63,97 +64,97 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  _openModalBottomSheet(bool isAvatarApplied) {
-    showModalBottomSheet(
-      showDragHandle: true,
-      scrollControlDisabledMaxHeightRatio: 0.3,
-      context: context,
-      builder: (context) {
-        return ListView(
-          children: isAvatarApplied
-              ? [
-                  GestureDetector(
-                    onTap: () async {
-                      _image = await pickImage(isCamera: false);
-                      avatarUrl = await uploadOnCloudinary(_image!.path);
-                      await addAvatar(avatarUrl!);
-                      Navigator.pop(context);
+  // _openModalBottomSheet(bool isAvatarApplied) {
+  //   showModalBottomSheet(
+  //     showDragHandle: true,
+  //     scrollControlDisabledMaxHeightRatio: 0.3,
+  //     context: context,
+  //     builder: (context) {
+  //       return ListView(
+  //         children: isAvatarApplied
+  //             ? [
+  //                 GestureDetector(
+  //                   onTap: () async {
+  //                     _image = await pickImage(isCamera: false);
+  //                     avatarUrl = await uploadOnCloudinary(_image!.path);
+  //                     await addAvatar(avatarUrl!);
+  //                     Navigator.pop(context);
 
-                      setState(() {});
-                    },
-                    child: const ListTile(
-                      leading: Icon(Icons.photo),
-                      title: Text('Add New photo from Gallery'),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 6,
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      _image = await pickImage(isCamera: false);
-                      avatarUrl = await uploadOnCloudinary(_image!.path);
-                      await addAvatar(avatarUrl!);
-                      Navigator.pop(context);
-                      setState(() {});
-                    },
-                    child: const ListTile(
-                      leading: Icon(Icons.camera),
-                      title: Text('Add New photo from Camera'),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      _image = null;
-                      avatarUrl = null;
-                      await removeAvatar();
-                      Navigator.pop(context);
-                      setState(() {});
-                    },
-                    child: const ListTile(
-                      leading: Icon(Icons.camera),
-                      title: Text('Remove Photo'),
-                    ),
-                  ),
-                ]
-              : [
-                  GestureDetector(
-                    onTap: () async {
-                      _image = await pickImage(isCamera: false);
-                      if (_image == null) return;
-                      avatarUrl = await uploadOnCloudinary(_image!.path);
-                      if (avatarUrl == null) return;
-                      await addAvatar(avatarUrl!);
-                      Navigator.pop(context);
+  //                     setState(() {});
+  //                   },
+  //                   child: const ListTile(
+  //                     leading: Icon(Icons.photo),
+  //                     title: Text('Add New photo from Gallery'),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(
+  //                   height: 6,
+  //                 ),
+  //                 GestureDetector(
+  //                   onTap: () async {
+  //                     _image = await pickImage(isCamera: false);
+  //                     avatarUrl = await uploadOnCloudinary(_image!.path);
+  //                     await addAvatar(avatarUrl!);
+  //                     Navigator.pop(context);
+  //                     setState(() {});
+  //                   },
+  //                   child: const ListTile(
+  //                     leading: Icon(Icons.camera),
+  //                     title: Text('Add New photo from Camera'),
+  //                   ),
+  //                 ),
+  //                 GestureDetector(
+  //                   onTap: () async {
+  //                     _image = null;
+  //                     avatarUrl = null;
+  //                     await removeAvatar();
+  //                     Navigator.pop(context);
+  //                     setState(() {});
+  //                   },
+  //                   child: const ListTile(
+  //                     leading: Icon(Icons.camera),
+  //                     title: Text('Remove Photo'),
+  //                   ),
+  //                 ),
+  //               ]
+  //             : [
+  //                 GestureDetector(
+  //                   onTap: () async {
+  //                     _image = await pickImage(isCamera: false);
+  //                     if (_image == null) return;
+  //                     avatarUrl = await uploadOnCloudinary(_image!.path);
+  //                     if (avatarUrl == null) return;
+  //                     await addAvatar(avatarUrl!);
+  //                     Navigator.pop(context);
 
-                      setState(() {});
-                    },
-                    child: const ListTile(
-                      leading: Icon(Icons.photo),
-                      title: Text('Add photo from Gallery'),
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 6,
-                  ),
-                  GestureDetector(
-                    onTap: () async {
-                      _image = await pickImage(isCamera: false);
-                      avatarUrl = await uploadOnCloudinary(_image!.path);
-                      await addAvatar(avatarUrl!);
-                      Navigator.pop(context);
-                      setState(() {});
-                    },
-                    child: const ListTile(
-                      leading: Icon(Icons.camera),
-                      title: Text('Add photo from Camera'),
-                    ),
-                  ),
-                ],
-        );
-      },
-    );
-  }
+  //                     setState(() {});
+  //                   },
+  //                   child: const ListTile(
+  //                     leading: Icon(Icons.photo),
+  //                     title: Text('Add photo from Gallery'),
+  //                   ),
+  //                 ),
+  //                 const SizedBox(
+  //                   height: 6,
+  //                 ),
+  //                 GestureDetector(
+  //                   onTap: () async {
+  //                     _image = await pickImage(isCamera: false);
+  //                     avatarUrl = await uploadOnCloudinary(_image!.path);
+  //                     await addAvatar(avatarUrl!);
+  //                     Navigator.pop(context);
+  //                     setState(() {});
+  //                   },
+  //                   child: const ListTile(
+  //                     leading: Icon(Icons.camera),
+  //                     title: Text('Add photo from Camera'),
+  //                   ),
+  //                 ),
+  //               ],
+  //       );
+  //     },
+  //   );
+  // }
 
   Future<void> addAvatar(String avatarUrl) async {
     final authService = Provider.of<AuthService>(context, listen: false);
@@ -199,7 +200,9 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MenuPage()),
+                  MaterialPageRoute(
+                    builder: (context) => const MenuPage(),
+                  ),
                 );
               },
               icon: const Icon(Icons.menu)),
@@ -236,30 +239,35 @@ class _ProfilePageState extends State<ProfilePage> {
                               children: [
                                 GestureDetector(
                                   onTap: () {
-                                    if (user!.id == currentUser!.id) {
-                                      _openModalBottomSheet(
-                                          user!.avatarUrl != null);
-                                    } else {
-                                      showDialog(
-                                          context: context,
-                                          builder: (context) {
-                                            return Container(
-                                              width: 200,
-                                              height: 200,
-                                              color: Colors.black12
-                                                  .withValues(alpha: 60),
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 4, vertical: 6),
-                                              child: user!.avatarUrl != ''
-                                                  ? Image.network(
-                                                      user!.avatarUrl!)
-                                                  : const Icon(
-                                                      Icons.person,
-                                                      size: 100,
-                                                    ),
-                                            );
-                                          });
-                                    }
+                                    // if (user!.id == currentUser!.id) {
+                                    //   Navigator.push(
+                                    //     context,
+                                    //     MaterialPageRoute(
+                                    //       builder: (context) =>
+                                    //           EditUserProfilePage(),
+                                    //     ),
+                                    //   );
+                                    // } else {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return Container(
+                                            width: 200,
+                                            height: 200,
+                                            color: Colors.black12
+                                                .withValues(alpha: 60),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 4, vertical: 6),
+                                            child: user!.avatarUrl != ''
+                                                ? Image.network(
+                                                    user!.avatarUrl!)
+                                                : const Icon(
+                                                    Icons.person,
+                                                    size: 100,
+                                                  ),
+                                          );
+                                        });
+                                    // }
                                   },
                                   child: Container(
                                     width: 60,
@@ -306,7 +314,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                   children: [
                                     Column(
                                       children: [
-                                        // Users followers data
                                         Text(
                                           user!.followers.length.toString(),
                                           style: const TextStyle(
@@ -325,7 +332,6 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                     Column(
                                       children: [
-                                        // Users following data
                                         Text(
                                           user!.following.length.toString(),
                                           style: const TextStyle(
@@ -356,7 +362,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                const MenuPage(),
+                                                const EditUserProfilePage(),
                                           ),
                                         );
                                       },
